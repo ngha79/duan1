@@ -42,6 +42,7 @@ supermartket\entity\Supplier$SupplierBuilder.class
 supermartket\ui\MainJFrame$11.class
 supermartket\ui\MainJFrame.class
 supermartket\entity\Product$ProductBuilder.class
+supermartket\ui\manager\Customer$1.class
 supermartket\entity\ImportReceipt.class
 supermartket\util\XIcon.class
 supermartket\dao\UnitDAO.class

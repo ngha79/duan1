@@ -14,4 +14,5 @@ public class ImportReceipt {
     private Date importDate;
     private Integer employeeID;
     private Integer supplierID;
+    private Integer paymentTypeId;
 }

@@ -15,5 +15,6 @@ public class Product {
     private Double purchasePrice;
     private Double salePrice;
     private Integer stockQuantity;
+    private Boolean status;
 }
 

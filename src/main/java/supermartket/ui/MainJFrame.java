@@ -41,7 +41,6 @@ public class MainJFrame extends javax.swing.JFrame {
         initComponents();
         dashboard = new Dashboard(mainPanel);
         this.setPanel(dashboard);
-
     }
 
     public void setPanel(Component panel) {

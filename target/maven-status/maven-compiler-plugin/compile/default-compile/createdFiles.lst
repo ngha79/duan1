@@ -1,4 +1,5 @@
 supermartket\ui\MainJFrame$6.class
+supermartket\dao\PaymentTypeDAO.class
 supermartket\entity\ImportReceiptDetail$ImportReceiptDetailBuilder.class
 supermartket\ui\manager\Category.class
 supermartket\entity\Customer$CustomerBuilder.class
@@ -8,10 +9,13 @@ supermartket\ui\MainJFrame$3.class
 supermartket\ui\LoginJDialog$3$1.class
 supermartket\ui\manager\Staff.class
 supermartket\ui\manager\Product.class
+supermartket\dao\impl\ProductCategoryDAOImpl.class
+supermartket\dao\impl\ProductDAOImpl.class
 supermartket\entity\Invoice.class
 supermartket\ui\manager\Dashboard$3.class
 supermartket\ui\manager\AnalysisReporting.class
 supermartket\ui\manager\Bill.class
+supermartket\dao\impl\UnitDAOImpl.class
 supermartket\entity\ProductCategory.class
 supermartket\entity\Invoice$InvoiceBuilder.class
 supermartket\util\TimeRange.class
@@ -21,7 +25,9 @@ supermartket\dao\CrudDAO.class
 supermartket\entity\Employee$EmployeeBuilder.class
 supermartket\ui\manager\Dashboard.class
 supermartket\ui\LoginJDialog$3.class
+supermartket\dao\impl\EmployeeDAOImpl.class
 supermartket\ui\MainJFrame$8.class
+supermartket\dao\impl\AnalysisAndReportingDAOImpl.class
 supermartket\entity\ImportReceipt$ImportReceiptBuilder.class
 supermartket\entity\InvoiceDetail.class
 supermartket\ui\LoginJDialog$2.class
@@ -33,9 +39,11 @@ supermartket\ui\MainJFrame$12.class
 supermartket\ui\manager\Warehouse.class
 supermartket\entity\ImportReceiptDetail.class
 supermartket\ui\MainJFrame$2.class
+supermartket\entity\PaymentType.class
 supermartket\ui\manager\Dashboard$4.class
 supermartket\dao\SupplierDAO.class
 supermartket\ui\LoginJDialog$1.class
+supermartket\dao\impl\PaymentTypeDAOImpl.class
 supermartket\entity\Customer.class
 supermartket\ui\manager\Dashboard$1.class
 supermartket\entity\Supplier$SupplierBuilder.class
@@ -47,6 +55,7 @@ supermartket\entity\ImportReceipt.class
 supermartket\util\XIcon.class
 supermartket\dao\UnitDAO.class
 supermartket\entity\InvoiceDetail$InvoiceDetailBuilder.class
+supermartket\dao\AnalysisAndReportingDAO.class
 supermartket\ui\MainJFrame$7.class
 supermartket\ui\manager\Setting.class
 supermartket\ui\MainJFrame$10.class
@@ -56,6 +65,7 @@ supermartket\entity\Product.class
 supermartket\dao\InvoiceDAO.class
 supermartket\entity\Unit.class
 supermartket\ui\manager\Sell.class
+supermartket\dao\impl\SupllierDAOImpl.class
 supermartket\dao\ImportReceiptDetailDAO.class
 supermartket\util\XDate.class
 supermartket\util\XStr.class
@@ -63,6 +73,7 @@ supermartket\dao\InvoiceDetailDAO.class
 supermartket\util\XQuery.class
 supermartket\ui\MainJFrame$5.class
 supermartket\ui\LoginJDialog.class
+supermartket\dao\impl\CustomerDAOImpl.class
 supermartket\dao\ImportReceiptDAO.class
 supermartket\entity\Employee.class
 supermartket\util\XDialog.class

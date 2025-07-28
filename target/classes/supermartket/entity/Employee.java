@@ -14,6 +14,8 @@ public class Employee {
     private String phone;
     private Boolean gender;
     private Date birthDate;
+    private Date startDate;
+    private Boolean status;
     private String address;
     private String role;
     private String password;

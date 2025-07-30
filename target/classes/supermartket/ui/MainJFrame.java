@@ -6,18 +6,22 @@ package supermartket.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
+import supermartket.entity.XAuth;
 import supermartket.ui.manager.AnalysisReporting;
 import supermartket.ui.manager.Bill;
 import supermartket.ui.manager.Category;
-import supermartket.ui.manager.Customer;
+import supermartket.ui.manager.CustomerManager;
 import supermartket.ui.manager.Dashboard;
-import supermartket.ui.manager.Product;
+import supermartket.ui.manager.ProductManager;
 import supermartket.ui.manager.Sell;
 import supermartket.ui.manager.Setting;
-import supermartket.ui.manager.Staff;
-import supermartket.ui.manager.Supplier;
+import supermartket.ui.manager.EmployeeManager;
+import supermartket.ui.manager.SupplierManager;
 import supermartket.ui.manager.Warehouse;
+import supermartket.util.XDialog;
 
 /**
  *
@@ -26,23 +30,46 @@ import supermartket.ui.manager.Warehouse;
 public class MainJFrame extends javax.swing.JFrame {
 
     private Dashboard dashboard;
-    private Product product = new Product();
+    private ProductManager product = new ProductManager();
     private Bill bill = new Bill();
     private Category category = new Category();
-    private Customer customer = new Customer();
+    private CustomerManager customer = new CustomerManager();
     private Sell sell = new Sell();
-    private Staff staff = new Staff();
-    private Supplier supplier = new Supplier();
+    private EmployeeManager staff = new EmployeeManager();
+    private SupplierManager supplier = new SupplierManager();
     private Warehouse warehouse = new Warehouse();
     private AnalysisReporting reporting = new AnalysisReporting();
     private Setting setting = new Setting();
 
     public MainJFrame() {
         initComponents();
+        this.init();
         dashboard = new Dashboard(mainPanel);
         this.setPanel(dashboard);
     }
-
+    
+    private void init(){
+        this.setLocationRelativeTo(null);
+        this.showWelcomeJDialog(this);
+        this.showLoginJDialog(this);
+//        this.setIconImage(XIcon.getIcon("/icons/trump-small.png").getImage());
+        
+       
+    }
+    
+    public void showLoginJDialog(JFrame frame) {
+        this.showJDialog(new LoginJDialog(frame, true));
+    }
+    
+    public void showWelcomeJDialog(JFrame frame) {
+        this.showJDialog(new WelcomeJDialog(frame, true));
+    }
+    
+    public void showJDialog(JDialog dialog) {
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
+    
     public void setPanel(Component panel) {
         mainPanel.removeAll();
         mainPanel.setLayout(new BorderLayout());
@@ -65,7 +92,7 @@ public class MainJFrame extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnExit = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
@@ -103,9 +130,14 @@ public class MainJFrame extends javax.swing.JFrame {
         jLabel3.setForeground(new java.awt.Color(102, 102, 102));
         jLabel3.setText("Hệ thống quản lý bán hàng siêu thị");
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-logout-24.png"))); // NOI18N
-        jButton1.setToolTipText("");
-        jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-logout-24.png"))); // NOI18N
+        btnExit.setToolTipText("");
+        btnExit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExitActionPerformed(evt);
+            }
+        });
 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel4.setText("A");
@@ -166,7 +198,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 .addGap(26, 26, 26)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnExit, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(28, 28, 28))
         );
         jPanel2Layout.setVerticalGroup(
@@ -180,7 +212,7 @@ public class MainJFrame extends javax.swing.JFrame {
                             .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(btnExit, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGroup(jPanel2Layout.createSequentialGroup()
                             .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGap(0, 0, Short.MAX_VALUE)
@@ -452,6 +484,13 @@ public class MainJFrame extends javax.swing.JFrame {
         setPanel(setting);
     }//GEN-LAST:event_btnSettingActionPerformed
 
+    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
+        // TODO add your handling code here:
+        if (XDialog.confirm("Bạn muốn kết thúc?")) {
+            System.exit(0);
+        }
+    }//GEN-LAST:event_btnExitActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -492,6 +531,7 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnCategory;
     private javax.swing.JButton btnCustomer;
     private javax.swing.JButton btnDashboard;
+    private javax.swing.JButton btnExit;
     private javax.swing.JButton btnProduct;
     private javax.swing.JButton btnReporting;
     private javax.swing.JButton btnSell;
@@ -499,7 +539,6 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnStaff;
     private javax.swing.JButton btnSupplier;
     private javax.swing.JButton btnWarehouse;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

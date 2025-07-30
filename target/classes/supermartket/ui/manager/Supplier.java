@@ -4,6 +4,10 @@
  */
 package supermartket.ui.manager;
 
+import java.awt.Frame;
+import javax.swing.SwingUtilities;
+import supermartket.ui.form.CreateSupplierJDialog;
+
 /**
  *
  * @author hanguyen
@@ -44,6 +48,11 @@ public class Supplier extends javax.swing.JPanel {
         jButton1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-plus-24.png"))); // NOI18N
         jButton1.setText("Thêm nhà cung cấp");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(51, 51, 51));
@@ -118,6 +127,13 @@ public class Supplier extends javax.swing.JPanel {
                 .addGap(0, 0, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        CreateSupplierJDialog createSupplier = new CreateSupplierJDialog((Frame) SwingUtilities.getWindowAncestor(this), true);
+        createSupplier.setLocationRelativeTo(null);
+        createSupplier.setVisible(true);
+    }//GEN-LAST:event_jButton1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

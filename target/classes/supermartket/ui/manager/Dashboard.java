@@ -143,7 +143,8 @@ public class Dashboard extends javax.swing.JPanel {
 
         jPanel2.setLayout(new java.awt.GridLayout(1, 4, 20, 20));
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(216, 216, 216)));
 
         jLabel3.setFont(new java.awt.Font("Roboto", 1, 14)); // NOI18N
         jLabel3.setText("Doanh thu hôm nay");
@@ -182,7 +183,8 @@ public class Dashboard extends javax.swing.JPanel {
 
         jPanel2.add(jPanel3);
 
-        jPanel7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel7.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(216, 216, 216)));
 
         jLabel6.setFont(new java.awt.Font("Roboto", 1, 14)); // NOI18N
         jLabel6.setText("Hóa đơn");
@@ -221,7 +223,8 @@ public class Dashboard extends javax.swing.JPanel {
 
         jPanel2.add(jPanel7);
 
-        jPanel8.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel8.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel8.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(216, 216, 216)));
 
         jLabel9.setFont(new java.awt.Font("Roboto", 1, 14)); // NOI18N
         jLabel9.setText("Sản phẩm");
@@ -260,7 +263,8 @@ public class Dashboard extends javax.swing.JPanel {
 
         jPanel2.add(jPanel8);
 
-        jPanel9.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel9.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel9.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(216, 216, 216)));
 
         jLabel12.setFont(new java.awt.Font("Roboto", 1, 14)); // NOI18N
         jLabel12.setText("Cảnh báo tồn kho");
@@ -340,13 +344,15 @@ public class Dashboard extends javax.swing.JPanel {
 
         jPanel5.setLayout(new java.awt.GridLayout(1, 2, 20, 0));
 
-        jPanel6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel6.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(216, 216, 216)));
 
         jLabel15.setFont(new java.awt.Font("Segoe UI", 1, 22)); // NOI18N
         jLabel15.setText("Hóa đơn gần đây");
 
         jLabel16.setText("5 giao dịch gần nhất trong ngày");
 
+        jPanel34.setBackground(new java.awt.Color(255, 255, 255));
         jPanel34.setLayout(new java.awt.GridLayout(5, 1, 0, 10));
 
         jPanel11.setBackground(new java.awt.Color(239, 239, 239));
@@ -689,17 +695,19 @@ public class Dashboard extends javax.swing.JPanel {
 
         jPanel5.add(jPanel6);
 
-        jPanel10.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel10.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel10.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(216, 216, 216)));
 
         jLabel47.setFont(new java.awt.Font("Segoe UI", 1, 22)); // NOI18N
         jLabel47.setText("Sản phẩm cần cập nhật thêm");
 
         jLabel48.setText("Danh sách sản phẩm sắp hết hàng");
 
+        jPanel43.setBackground(new java.awt.Color(255, 255, 255));
         jPanel43.setLayout(new java.awt.GridLayout(5, 1, 0, 10));
 
-        jPanel25.setBackground(new java.awt.Color(239, 239, 239));
-        jPanel25.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel25.setBackground(new java.awt.Color(246, 246, 246));
+        jPanel25.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(216, 216, 216)));
 
         jLabel49.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel49.setText("HD001");
@@ -783,8 +791,8 @@ public class Dashboard extends javax.swing.JPanel {
 
         jPanel43.add(jPanel25);
 
-        jPanel44.setBackground(new java.awt.Color(239, 239, 239));
-        jPanel44.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel44.setBackground(new java.awt.Color(246, 246, 246));
+        jPanel44.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(216, 216, 216)));
 
         jLabel77.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel77.setText("HD001");
@@ -868,8 +876,8 @@ public class Dashboard extends javax.swing.JPanel {
 
         jPanel43.add(jPanel44);
 
-        jPanel47.setBackground(new java.awt.Color(239, 239, 239));
-        jPanel47.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel47.setBackground(new java.awt.Color(246, 246, 246));
+        jPanel47.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(216, 216, 216)));
 
         jLabel81.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel81.setText("HD001");
@@ -953,8 +961,8 @@ public class Dashboard extends javax.swing.JPanel {
 
         jPanel43.add(jPanel47);
 
-        jPanel50.setBackground(new java.awt.Color(239, 239, 239));
-        jPanel50.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel50.setBackground(new java.awt.Color(246, 246, 246));
+        jPanel50.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(216, 216, 216)));
 
         jLabel85.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel85.setText("HD001");
@@ -1125,7 +1133,7 @@ public class Dashboard extends javax.swing.JPanel {
 
     private void btnAddProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddProductActionPerformed
         // TODO add your handling code here:
-        Product product = new Product();
+        ProductManager product = new ProductManager();
         mainPanel.removeAll();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(product, BorderLayout.CENTER);
@@ -1135,7 +1143,7 @@ public class Dashboard extends javax.swing.JPanel {
 
     private void btnImportReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportReceiptActionPerformed
         // TODO add your handling code here:
-        Supplier supplier = new Supplier();
+        SupplierManager supplier = new SupplierManager();
         mainPanel.removeAll();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(supplier, BorderLayout.CENTER);

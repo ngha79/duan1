@@ -8,9 +8,11 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Supplier {
-    private Integer supplierID;
+    private String supplierID;
     private String supplierName;
-    private String phone;
     private String address;
+    private String phone;
+    private String email;
     private Boolean status;
 }
+

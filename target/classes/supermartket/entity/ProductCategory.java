@@ -7,7 +7,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ProductCategory {
-    private Integer categoryID;
+    private String categoryID;
     private String categoryName;
+    private String categoryDescription;
 }
+
 

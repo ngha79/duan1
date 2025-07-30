@@ -2,19 +2,20 @@ package supermartket.entity;
 
 
 import lombok.*;
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Product {
-    private Integer productID;
+    private String productID;
     private String productName;
-    private Integer categoryID;
-    private Integer unitID;
-    private Double purchasePrice;
-    private Double salePrice;
-    private Integer stockQuantity;
-    private Boolean status;
+    private String categoryID;
+    private String supplierID;
+    private BigDecimal price;
+    private Integer quantity;
+    private String status;
+    private String unit;
 }
 

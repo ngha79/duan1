@@ -7,8 +7,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Customer {
-    private Integer customerID;
+    private String customerID;
     private String fullName;
     private String phone;
-    private Integer loyaltyPoints;
+    private String email;
+    private Double totalPayment;  
 }

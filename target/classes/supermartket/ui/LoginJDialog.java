@@ -5,6 +5,13 @@
 package supermartket.ui;
 
 //import com.formdev.flatlaf.FlatClientProperties;
+
+import supermartket.dao.UserDAO;
+import supermartket.dao.impl.UserDAOImpl;
+import supermartket.entity.User;
+import supermartket.entity.XAuth;
+import supermartket.util.XDialog;
+
 //import com.formdev.flatlaf.FlatLightLaf;
 //import javax.swing.UIManager;
 //import poly.grocery.util.baseTheme;
@@ -151,8 +158,39 @@ public class LoginJDialog extends javax.swing.JDialog {
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
         // TODO add your handling code here:
+        this.login();
     }//GEN-LAST:event_btnLoginActionPerformed
 
+    public void login() {
+        String username = txtUserName.getText();
+        String password = txtPassword.getText();
+        
+        String validateUsername = "^[a-z0-9_.-]{4,20}$";
+        String validatePassword = "^[a-zA-Z0-9@#$%^&+=!._-]+$";
+
+        if (!username.matches(validateUsername)) {
+            XDialog.alert("Tên tài khoản không hợp lệ.!");
+            return;
+        } 
+        if (!password.matches(validatePassword)) {
+            XDialog.alert("Mật khẩu không hợp lệ.!");
+            return;
+        } 
+
+        UserDAO dao = new UserDAOImpl();
+        User user = dao.findById(username);
+        if (user == null) {
+            XDialog.alert("Sai tên đăng nhập!");
+        } else if (!password.equals(user.getPassword())) {
+            XDialog.alert("Sai mật khẩu đăng nhập!");
+        } else if (!user.isEnabled()) {
+            XDialog.alert("Tài khoản của bạn đang tạm dừng!");
+        } else {
+            XAuth.user = user; 
+            this.dispose();
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */

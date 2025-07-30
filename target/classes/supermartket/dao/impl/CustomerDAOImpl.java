@@ -3,42 +3,58 @@ package supermartket.dao.impl;
 import java.util.List;
 import supermartket.dao.CustomerDAO;
 import supermartket.entity.Customer;
+import supermartket.util.XJdbc;
+import supermartket.util.XQuery;
 
 public class CustomerDAOImpl implements CustomerDAO {
-    private String insertSql = "";
-    private String updateSql = "";
-    private String deleteSql = "";
-    private String findByNameSql = "";
-    private String findByIdSql = "";
-    private String findAllSql = "";
+    private final String insertSql = "INSERT INTO Customer (CustomerID, FullName, Phone, Email) VALUES (?, ?, ?, ?)";
+    private final String updateSql = "UPDATE Customer SET FullName = ?, Phone = ?, Email = ? WHERE CustomerID = ?";
+    private final String deleteSql = "DELETE FROM Customer WHERE CustomerID = ?";
+    private final String findByIdSql = "SELECT * FROM Customer WHERE CustomerID = ?";
+    private final String findAllSql = "SELECT * FROM Customer";
+    private final String findByNameSql = "SELECT * FROM Customer WHERE FullName LIKE ?";
 
     @Override
     public Customer create(Customer entity) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Object[] values = {
+            entity.getCustomerID(),
+            entity.getFullName(),
+            entity.getPhone(),
+            entity.getEmail(),
+        };
+        XJdbc.executeUpdate(insertSql, values);
+        return entity;
     }
 
     @Override
     public void update(Customer entity) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Object[] values = {
+            entity.getFullName(),
+            entity.getPhone(),
+            entity.getEmail(),
+            entity.getCustomerID()
+        };
+        XJdbc.executeUpdate(updateSql, values);
     }
 
     @Override
-    public void deleteById(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void deleteById(String id) {
+        XJdbc.executeUpdate(deleteSql, id);
+    }
+
+    @Override
+    public Customer findById(String id) {
+        return XQuery.getSingleBean(Customer.class, findByIdSql, id);
     }
 
     @Override
     public List<Customer> findAll() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return XQuery.getBeanList(Customer.class, findAllSql);
     }
-
+    
     @Override
-    public Customer findById(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public List<Customer> findByName(String nameKeyword) {
+        return XQuery.getBeanList(Customer.class, findByNameSql, "%" + nameKeyword + "%");
     }
-
-   
-
-    
-    
 }
+

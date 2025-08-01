@@ -49,9 +49,11 @@ public class MainJFrame extends javax.swing.JFrame {
     }
     
     private void init(){
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        this.setResizable(false);
         this.setLocationRelativeTo(null);
-        this.showWelcomeJDialog(this);
-        this.showLoginJDialog(this);
+//        this.showWelcomeJDialog(this);
+//        this.showLoginJDialog(this);
 //        this.setIconImage(XIcon.getIcon("/icons/trump-small.png").getImage());
         
        

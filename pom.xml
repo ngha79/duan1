@@ -27,6 +27,12 @@
             <artifactId>AbsoluteLayout</artifactId>
             <version>RELEASE240</version>
         </dependency>
+        <dependency>
+            <groupId>com.miglayout</groupId>
+            <artifactId>miglayout-swing</artifactId>
+            <version>11.0</version>
+        </dependency>
+
     </dependencies>
     <build>
         <resources>

@@ -20,6 +20,7 @@ import supermartket.ui.manager.Sell;
 import supermartket.ui.manager.Setting;
 import supermartket.ui.manager.EmployeeManager;
 import supermartket.ui.manager.SupplierManager;
+import supermartket.ui.manager.UserManager;
 import supermartket.ui.manager.Warehouse;
 import supermartket.util.XDialog;
 
@@ -40,6 +41,7 @@ public class MainJFrame extends javax.swing.JFrame {
     private Warehouse warehouse = new Warehouse();
     private AnalysisReporting reporting = new AnalysisReporting();
     private Setting setting = new Setting();
+    private UserManager users = new UserManager();
 
     public MainJFrame() {
         initComponents();
@@ -49,9 +51,11 @@ public class MainJFrame extends javax.swing.JFrame {
     }
     
     private void init(){
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        this.setResizable(false);
         this.setLocationRelativeTo(null);
-        this.showWelcomeJDialog(this);
-        this.showLoginJDialog(this);
+//        this.showWelcomeJDialog(this);
+//        this.showLoginJDialog(this);
 //        this.setIconImage(XIcon.getIcon("/icons/trump-small.png").getImage());
         
        
@@ -112,6 +116,7 @@ public class MainJFrame extends javax.swing.JFrame {
         btnReporting = new javax.swing.JButton();
         btnSetting = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
+        btnReporting1 = new javax.swing.JButton();
         mainPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -334,13 +339,25 @@ public class MainJFrame extends javax.swing.JFrame {
             }
         });
 
+        btnReporting1.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnReporting1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-supplier-24.png"))); // NOI18N
+        btnReporting1.setText("Tài khoản");
+        btnReporting1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnReporting1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReporting1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSeparator1)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGap(14, 14, 14)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnReporting1, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSetting, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnReporting, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -353,7 +370,6 @@ public class MainJFrame extends javax.swing.JFrame {
                     .addComponent(btnProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnDashboard, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(14, Short.MAX_VALUE))
-            .addComponent(jSeparator1)
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -379,10 +395,12 @@ public class MainJFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnReporting, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnReporting1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSetting, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(293, Short.MAX_VALUE))
+                .addContainerGap(236, Short.MAX_VALUE))
         );
 
         mainPanel.setAutoscrolls(true);
@@ -491,6 +509,11 @@ public class MainJFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnExitActionPerformed
 
+    private void btnReporting1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReporting1ActionPerformed
+        // TODO add your handling code here:
+        setPanel(users);
+    }//GEN-LAST:event_btnReporting1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -534,6 +557,7 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnProduct;
     private javax.swing.JButton btnReporting;
+    private javax.swing.JButton btnReporting1;
     private javax.swing.JButton btnSell;
     private javax.swing.JButton btnSetting;
     private javax.swing.JButton btnStaff;

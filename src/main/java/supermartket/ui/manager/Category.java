@@ -171,19 +171,16 @@ public class Category extends javax.swing.JPanel {
 
         categories.forEach(card -> pnlGrid.add(this.createButton(card)));
 
-// Tính chiều cao
         int itemHeight = 170;
-        int rows = (int) Math.ceil(categories.size() / 3.0); // chia float mới đúng
-        int totalHeight = rows * (itemHeight + 20); // có thêm khoảng cách
+        int rows = (int) Math.ceil(categories.size() / 3.0); 
+        int totalHeight = rows * (itemHeight + 20); 
 
         pnlGrid.setPreferredSize(new Dimension(0, totalHeight));
-        pnlCategories.add(pnlGrid, BorderLayout.NORTH); // để panel không bị dãn full height
+        pnlCategories.add(pnlGrid, BorderLayout.NORTH); 
 
-// ScrollPane
         JScrollPane scrollPane = new JScrollPane(pnlCategories);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-// Main panel
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(scrollPane, BorderLayout.CENTER);
     }

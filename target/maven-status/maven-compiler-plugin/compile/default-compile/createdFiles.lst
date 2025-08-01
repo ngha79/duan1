@@ -10,6 +10,7 @@ supermartket\ui\form\CreateProductCategoryJDialog$2.class
 supermartket\ui\form\UpdateCustomerJDialog.class
 supermartket\dao\impl\ProductCategoryDAOImpl.class
 supermartket\entity\Invoice.class
+supermartket\ui\comp\FlowScrollPanel.class
 supermartket\ui\manager\AnalysisReporting.class
 supermartket\ui\form\UpdateEmployeeJDialog.class
 supermartket\ui\manager\Bill.class
@@ -19,6 +20,7 @@ supermartket\ui\form\UpdateProductCategoryJDialog$3.class
 supermartket\entity\ProductCategory.class
 supermartket\entity\Invoice$InvoiceBuilder.class
 supermartket\util\TimeRange.class
+supermartket\ui\comp\CartItem.class
 supermartket\dao\EmployeeDAO.class
 supermartket\entity\Employee$EmployeeBuilder.class
 supermartket\ui\manager\Dashboard.class

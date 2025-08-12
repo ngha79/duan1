@@ -183,9 +183,8 @@ public class LoginJDialog extends javax.swing.JDialog {
             XDialog.alert("Sai tên đăng nhập!");
         } else if (!password.equals(user.getPassword())) {
             XDialog.alert("Sai mật khẩu đăng nhập!");
-        } else if (!user.isEnabled()) {
-            XDialog.alert("Tài khoản của bạn đang tạm dừng!");
         } else {
+            System.out.println(user);
             XAuth.user = user; 
             this.dispose();
         }

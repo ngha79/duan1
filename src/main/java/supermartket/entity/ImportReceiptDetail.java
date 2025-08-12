@@ -1,5 +1,6 @@
 package supermartket.entity;
 
+import java.math.BigDecimal;
 import lombok.*;
 
 @Data
@@ -7,8 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ImportReceiptDetail {
-    private Integer receiptID;
-    private Integer productID;
+    private String receiptID;
+    private String productID;
     private Integer quantity;
-    private Double unitPrice;
+    private BigDecimal unitPrice;
 }

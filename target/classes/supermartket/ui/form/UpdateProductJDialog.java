@@ -4,8 +4,19 @@
  */
 package supermartket.ui.form;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import java.awt.Image;
+import java.io.File;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import supermartket.dao.ProductCategoryDAO;
 import supermartket.dao.ProductDAO;
 import supermartket.dao.SupplierDAO;
@@ -15,6 +26,7 @@ import supermartket.dao.impl.SupplierDAOImpl;
 import supermartket.entity.Product;
 import supermartket.entity.ProductCategory;
 import supermartket.entity.Supplier;
+import supermartket.util.CloudinaryConfig;
 import supermartket.util.XDialog;
 
 public class UpdateProductJDialog extends javax.swing.JDialog {
@@ -25,28 +37,51 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
     List<Supplier> suppliers = supDao.findAll();
     List<ProductCategory> categories = cateDao.findAll();
 
+    private void setImageToLabel(JLabel label, String imagePath) {
+        try {
+            ImageIcon icon;
+            if (imagePath.startsWith("http")) { // Ảnh từ internet
+                icon = new ImageIcon(new URL(imagePath));
+            } else { // Ảnh từ file local
+                icon = new ImageIcon(imagePath);
+            }
+
+            // Scale ảnh vừa với label
+            Image img = icon.getImage().getScaledInstance(
+                    label.getWidth(),
+                    label.getHeight(),
+                    Image.SCALE_SMOOTH
+            );
+
+            label.setIcon(new ImageIcon(img));
+            label.setText(null);
+            label.setToolTipText(imagePath);
+        } catch (Exception e) {
+            e.printStackTrace();
+            label.setText("Không tải được ảnh");
+        }
+    }
+
     /**
      * Creates new form CreateProduct
      */
     public UpdateProductJDialog(java.awt.Frame parent, boolean modal, Product product) {
         super(parent, modal);
         initComponents();
-
         for (Supplier supplier : suppliers) {
             cboNCC.addItem(supplier.getSupplierName());
         }
-
         for (ProductCategory category : categories) {
             cboCategory.addItem(category.getCategoryName());
         }
-
         txtName.setText(product.getProductName());
         txtProductID.setText(product.getProductID());
         txtProductPrice.setText(product.getPrice().toString());
         txtUnit.setText(product.getUnit());
         txtQuantity.setText(product.getQuantity().toString());
-        cboStatus.setSelectedItem(product.getStatus());
+        setImageToLabel(img_Upload, product.getProductImage());
 
+        cboStatus.setSelectedItem(product.getStatus());
         for (Supplier supplier : suppliers) {
             if (supplier.getSupplierID().equalsIgnoreCase(product.getSupplierID())) {
                 cboNCC.setSelectedItem(supplier.getSupplierName());
@@ -59,6 +94,26 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
         }
     }
 
+    private void uploadImage() {
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            // Cloudinary configuration
+            Cloudinary cloudinary = CloudinaryConfig.getInstance();
+            try {
+                // Uploading the image
+                Map uploadResult = cloudinary.uploader().upload(selectedFile, ObjectUtils.emptyMap());
+                String imageUrl = (String) uploadResult.get("secure_url");
+                JOptionPane.showMessageDialog(this, "Thêm ảnh thành công.");
+                setImageToLabel(img_Upload, imageUrl);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Có lỗi xảy ra.");
+            }
+        }
+    }
+
     public Product getFormData() {
         String id = txtProductID.getText().trim();
         String name = txtName.getText().trim();
@@ -66,10 +121,9 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
         BigDecimal price = BigDecimal.valueOf(Double.parseDouble(txtProductPrice.getText().trim()));
         String unit = txtUnit.getText().trim();
         String status = cboStatus.getSelectedItem().toString();
-
         String supplierID = suppliers.get(0).getSupplierID();
         String categoryID = categories.get(0).getCategoryID();
-
+        String hinh = img_Upload.getToolTipText();
         for (Supplier sup : suppliers) {
             if (sup.getSupplierName().equalsIgnoreCase(cboNCC.getSelectedItem().toString())) {
                 supplierID = sup.getSupplierID();
@@ -82,6 +136,11 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
                 categoryID = category.getCategoryID();
                 break;
             }
+        }
+
+        if (hinh.isEmpty()) {
+            XDialog.alert("Bạn chưa thêm ảnh của sản phẩm");
+            return null;
         }
 
         if (id.isEmpty() || name.isEmpty() || unit.isEmpty()) {
@@ -98,6 +157,7 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
                 .supplierID(supplierID)
                 .productID(id)
                 .productName(name)
+                .productImage(hinh)
                 .categoryID(categoryID)
                 .price(price)
                 .quantity(quantity)
@@ -136,6 +196,9 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
         cboCategory = new javax.swing.JComboBox<>();
         cboNCC = new javax.swing.JComboBox<>();
         cboStatus = new javax.swing.JComboBox<>();
+        jLabel11 = new javax.swing.JLabel();
+        img_Upload = new javax.swing.JLabel();
+        btnUploadImage = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -177,6 +240,15 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
 
         cboStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Đang bán", "Ngừng bán" }));
 
+        jLabel11.setText("Ảnh");
+
+        btnUploadImage.setText("Thêm ảnh");
+        btnUploadImage.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUploadImageActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -194,7 +266,12 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(img_Upload, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(28, 28, 28)
+                                        .addComponent(btnUploadImage, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -231,7 +308,13 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
-                .addGap(18, 18, 18)
+                .addGap(20, 20, 20)
+                .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnUploadImage, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(img_Upload, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -310,6 +393,11 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
+    private void btnUploadImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadImageActionPerformed
+        // TODO add your handling code here:
+        uploadImage();
+    }//GEN-LAST:event_btnUploadImageActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -359,11 +447,14 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnUpdate;
+    private javax.swing.JButton btnUploadImage;
     private javax.swing.JComboBox<String> cboCategory;
     private javax.swing.JComboBox<String> cboNCC;
     private javax.swing.JComboBox<String> cboStatus;
+    private javax.swing.JLabel img_Upload;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;

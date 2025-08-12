@@ -8,22 +8,20 @@ import supermartket.util.XQuery;
 
 public class UserDAOImpl implements UserDAO {
 
-    String createSql = "INSERT INTO Users(Username, Password, Enabled, Fullname, Photo, Manager) VALUES(?,?,?,?,?,?)";
-    String updateSql = "UPDATE Users SET Password=?, Enabled=?, Fullname=?, Photo=?, Manager=? WHERE Username=?";
+    String createSql = "INSERT INTO Users(Username, Password,  Role, EmployeeCode) VALUES(?,?,?,?)";
+    String updateSql = "UPDATE Users SET Password=?, Role=? WHERE Username=?";
     String deleteSql = "DELETE FROM Users WHERE Username=?";
     String findAllSql = "SELECT * FROM Users";
     String findByIdSql = "SELECT * FROM Users WHERE Username=?";
+    String findByNameSql = "SELECT * FROM Users u LEFT JOIN Employee e ON u.EmployeeCode = e.EmployeeID WHERE u.Username LIKE ? OR e.FullName LIKE ?";
 
     @Override
     public User create(User entity) {
         Object[] values = {
             entity.getUsername(),
             entity.getPassword(),
-            entity.isEnabled(),
-            entity.getFullname(),
-            entity.getPhoto(),
-            entity.isManager()
-        };
+            entity.getRole(),
+            entity.getEmployeeCode(),};
         XJdbc.executeUpdate(createSql, values);
         return entity;
     }
@@ -32,12 +30,8 @@ public class UserDAOImpl implements UserDAO {
     public void update(User entity) {
         Object[] values = {
             entity.getPassword(),
-            entity.isEnabled(),
-            entity.getFullname(),
-            entity.getPhoto(),
-            entity.isManager(),
-            entity.getUsername()
-        };
+            entity.getRole(),
+            entity.getUsername(),};
         XJdbc.executeUpdate(updateSql, values);
     }
 
@@ -53,7 +47,16 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public User findById(String id) {
+
         return XQuery.getSingleBean(User.class, findByIdSql, id);
     }
-}
 
+    @Override
+    public List<User> findByName(String name) {
+        Object[] values = {
+            "%" + name + "%",
+            "%" + name + "%"
+        };
+        return XQuery.getBeanList(User.class, findByNameSql, values);
+    }
+}

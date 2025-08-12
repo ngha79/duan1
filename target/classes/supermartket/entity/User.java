@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 public class User {
     private String username;
     private String password;
-    private boolean enabled;
-    private String fullname;
-    private String employeeID;
-    @Builder.Default
-    private String photo = "trump-small.png";
-    private boolean manager;
+    private String role;
+    private String employeeCode;
 }

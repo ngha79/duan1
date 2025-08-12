@@ -6,20 +6,26 @@ package supermartket.ui.manager;
 
 import java.awt.Frame;
 import java.util.List;
+import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import supermartket.dao.CreateCustomerListener;
 import supermartket.dao.CustomerDAO;
 import supermartket.dao.JPanelManager;
+import supermartket.dao.dto.CustomerDTO;
+import supermartket.dao.dto.CustomerInfoDTO;
 import supermartket.dao.impl.CustomerDAOImpl;
 import supermartket.entity.Customer;
+import supermartket.excel.ExcelExporterCustomer;
+import supermartket.excel.ExcelExporterInvoice;
+import supermartket.pagination.EventPagination;
 import supermartket.ui.comp.ActionCellEditor;
 import supermartket.ui.comp.ActionCellRenderer;
 import supermartket.ui.form.CreateCustomerJDialog;
 import supermartket.ui.form.UpdateCustomerJDialog;
 
 public final class CustomerManager extends javax.swing.JPanel implements JPanelManager<Customer, String> {
-
+    int currentPage = 1;
     CustomerDAO dao = new CustomerDAOImpl();
 
     /**
@@ -27,11 +33,23 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
      */
     public CustomerManager() {
         initComponents();
-        filltoTable();
         ActionCellEditor editor = new ActionCellEditor(tblCustomer, this);
-        tblCustomer.setRowHeight(40);
+        tblCustomer.setRowHeight(60);
         tblCustomer.getColumnModel().getColumn(5).setCellRenderer(new ActionCellRenderer());
         tblCustomer.getColumnModel().getColumn(5).setCellEditor(editor);
+        CustomerInfoDTO cus = dao.customerDetail();
+        txtTotalCustomer.setText(cus.getTotalCustomers().toString());
+        txtTotalCustomerThisMonth.setText(cus.getNewCustomersThisMonth().toString());
+        txtTotalCustomerThisWeek.setText("+" + cus.getNewCustomersThisWeek() + " khách hàng mới tuần này");
+        pagination1.addEventPagination(new EventPagination() {
+            @Override
+            public void pageChanged(int page) {
+                filltoTable(page);
+                currentPage = page;
+            }
+
+        });
+        filltoTable(currentPage);
     }
 
     /**
@@ -48,23 +66,22 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
         jLabel2 = new javax.swing.JLabel();
         btnCreate = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        btnCreate1 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jPanel8 = new javax.swing.JPanel();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
+        txtTotalCustomer = new javax.swing.JLabel();
+        txtTotalCustomerThisWeek = new javax.swing.JLabel();
         jPanel10 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
-        jLabel13 = new javax.swing.JLabel();
+        txtTotalCustomerThisMonth = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         txtSearch = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
+        btnSearch = new javax.swing.JButton();
+        pagination1 = new supermartket.pagination.Pagination();
 
         jPanel1.setPreferredSize(new java.awt.Dimension(1098, 829));
 
@@ -86,6 +103,16 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
         jLabel1.setForeground(new java.awt.Color(51, 51, 51));
         jLabel1.setText("Quản lý thông tin khách hàng");
 
+        btnCreate1.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
+        btnCreate1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-plus-24.png"))); // NOI18N
+        btnCreate1.setText("Xuất Excel");
+        btnCreate1.setToolTipText("");
+        btnCreate1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreate1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -96,6 +123,8 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 314, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnCreate1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnCreate)
                 .addGap(14, 14, 14))
         );
@@ -110,7 +139,9 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(15, 15, 15)
-                        .addComponent(btnCreate, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnCreate, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnCreate1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -122,11 +153,11 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel3.setText("Tổng khách hàng");
 
-        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel4.setText("1,247");
+        txtTotalCustomer.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        txtTotalCustomer.setText("1,247");
 
-        jLabel5.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel5.setText("+12 khách hàng mới tuần này");
+        txtTotalCustomerThisWeek.setForeground(new java.awt.Color(102, 102, 102));
+        txtTotalCustomerThisWeek.setText("+12 khách hàng mới tuần này");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -136,8 +167,8 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
                 .addGap(14, 14, 14)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtTotalCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtTotalCustomerThisWeek, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
@@ -146,51 +177,13 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
                 .addGap(15, 15, 15)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtTotalCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel5)
+                .addComponent(txtTotalCustomerThisWeek)
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
         jPanel3.add(jPanel4);
-
-        jPanel8.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel8.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(200, 200, 200)));
-
-        jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
-        jLabel6.setText("Khách hàng VIP");
-
-        jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel7.setText("89");
-
-        jLabel8.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel8.setText("Mua trên 5 triệu/tháng");
-
-        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
-        jPanel8.setLayout(jPanel8Layout);
-        jPanel8Layout.setHorizontalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel8Layout.setVerticalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel8)
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
-
-        jPanel3.add(jPanel8);
 
         jPanel10.setBackground(new java.awt.Color(255, 255, 255));
         jPanel10.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(200, 200, 200)));
@@ -198,8 +191,8 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
         jLabel12.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel12.setText("Khách hàng mới");
 
-        jLabel13.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel13.setText("156");
+        txtTotalCustomerThisMonth.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        txtTotalCustomerThisMonth.setText("156");
 
         jLabel14.setForeground(new java.awt.Color(102, 102, 102));
         jLabel14.setText("Tháng này");
@@ -212,7 +205,7 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
                 .addGap(14, 14, 14)
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtTotalCustomerThisMonth, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -222,7 +215,7 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
                 .addGap(15, 15, 15)
                 .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtTotalCustomerThisMonth, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel14)
                 .addContainerGap(15, Short.MAX_VALUE))
@@ -257,6 +250,13 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
         ));
         jScrollPane1.setViewportView(tblCustomer);
 
+        btnSearch.setText("Lọc");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -268,10 +268,14 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 1086, Short.MAX_VALUE)
                     .addComponent(jScrollPane1)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 345, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 437, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 345, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 437, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnSearch)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pagination1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -283,9 +287,12 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
                 .addGap(35, 35, 35)
                 .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 460, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pagination1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 477, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -297,9 +304,7 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 26, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 835, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -312,7 +317,7 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
         CreateCustomerJDialog createCustomer = new CreateCustomerJDialog((Frame) SwingUtilities.getWindowAncestor(this), true, new CreateCustomerListener() {
             @Override
             public void onCreate() {
-                filltoTable();
+                filltoTable(1);
             }
         });
         createCustomer.setLocationRelativeTo(null);
@@ -322,53 +327,54 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
     private void txtSearchKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyPressed
         // TODO add your handling code here:
         String keyword = txtSearch.getText().trim();
-        List<Customer> results = dao.findByName(keyword);
-        fillTable(results);
     }//GEN-LAST:event_txtSearchKeyPressed
 
-    public void fillTable(List<Customer> list) {
-        DefaultTableModel table = (DefaultTableModel) tblCustomer.getModel();
-        table.setNumRows(0);
-        for (Customer customer : list) {
-            Object[] values = {
-                customer.getCustomerID(),
-                customer.getFullName(),
-                customer.getPhone(),
-                customer.getEmail(),
-                customer.getTotalPayment(),};
-            table.addRow(values);
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // TODO add your handling code here:
+        filltoTable(1);
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnCreate1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreate1ActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+            if (!filePath.endsWith(".xlsx")) {
+                filePath += ".xlsx";
+            }
+            ExcelExporterCustomer.exportTableToExcel(tblCustomer, dao.findAll(), filePath);
         }
-    }
+    }//GEN-LAST:event_btnCreate1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCreate;
+    private javax.swing.JButton btnCreate1;
+    private javax.swing.JButton btnSearch;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
+    private supermartket.pagination.Pagination pagination1;
     private javax.swing.JTable tblCustomer;
     private javax.swing.JTextField txtSearch;
+    private javax.swing.JLabel txtTotalCustomer;
+    private javax.swing.JLabel txtTotalCustomerThisMonth;
+    private javax.swing.JLabel txtTotalCustomerThisWeek;
     // End of variables declaration//GEN-END:variables
 
-    @Override
-    public void filltoTable() {
-        List<Customer> list = dao.findAll();
+    public void filltoTable(int page) {
         DefaultTableModel table = (DefaultTableModel) tblCustomer.getModel();
+        CustomerDTO dto = new CustomerDTO(txtSearch.getText().trim(), page);
+        List<Customer> list = dao.findByName(dto);
         table.setNumRows(0);
         for (Customer customer : list) {
             Object[] values = {
@@ -379,12 +385,16 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
                 customer.getTotalPayment(),};
             table.addRow(values);
         }
+        int count = dao.getTotalItem(dto).getCount();
+        int limit = 10;
+        int totalPage = (int) Math.ceil(count / limit);
+        pagination1.setPagegination(page, totalPage);
     }
 
     @Override
     public void delete(String id) {
         dao.deleteById(id);
-        filltoTable();
+        filltoTable(currentPage);
     }
 
     @Override
@@ -393,6 +403,6 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
         UpdateCustomerJDialog dialog = new UpdateCustomerJDialog(null, true, cus);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
-        filltoTable();
+        filltoTable(currentPage);
     }
 }

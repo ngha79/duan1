@@ -8,7 +8,11 @@ import java.awt.Frame;
 import java.awt.Window;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import supermartket.dao.CreateListener;
+import supermartket.dao.ProductCategoryDAO;
 import supermartket.dao.ProductCategoryListener;
+import supermartket.dao.UpdateProductCategoryListener;
+import supermartket.dao.impl.ProductCategoryDAOImpl;
 import supermartket.entity.ProductCategory;
 import supermartket.ui.form.UpdateProductCategoryJDialog;
 import supermartket.ui.manager.Category;
@@ -19,7 +23,10 @@ import supermartket.ui.manager.Category;
  */
 public class ProductCategoryItem extends javax.swing.JPanel {
 
+    ProductCategoryDAO dao = new ProductCategoryDAOImpl();
+
     private ProductCategory category = null;
+    private ProductCategoryListener listener = null;
 
     /**
      * Creates new form ProductCategoryItem
@@ -28,19 +35,40 @@ public class ProductCategoryItem extends javax.swing.JPanel {
      * @param category
      * @param listener
      */
-    public ProductCategoryItem(Category parent, ProductCategory category, ProductCategoryListener listener) {
+    public ProductCategoryItem(Category parent, ProductCategory category, ProductCategoryListener lis) {
         initComponents();
-        txtCategoryCode.setText(category.getCategoryID());
-        txtCategoryDescription.setText(category.getCategoryDescription());
-        txtCategoryName.setText(category.getCategoryName());
+        fillForm(category);
         this.category = category;
+        this.listener = lis;
         btnDelete.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(null,
                     "Bạn có chắc muốn xóa?", "Xác nhận", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                listener.onDelete(this); 
+                dao.deleteById(category.getCategoryID());
+                lis.onDelete(this);
             }
         });
+
+        btnUpdate.addActionListener(e -> {
+            ProductCategoryItem item = this;
+            Window parentWindow = SwingUtilities.getWindowAncestor(this);
+            UpdateProductCategoryJDialog dialog = new UpdateProductCategoryJDialog((Frame) parentWindow, true, category, new UpdateProductCategoryListener() {
+                @Override
+                public void onUpdate(ProductCategory cate) {
+                    fillForm(cate);
+                    dao.update(cate);
+                    lis.onUpdate(item, cate);
+                }
+            }); // true = modal
+            dialog.setLocationRelativeTo(null); // căn giữa so với JPanel
+            dialog.setVisible(true);
+        });
+    }
+
+    public void fillForm(ProductCategory category) {
+        txtCategoryCode.setText(category.getCategoryID());
+        txtCategoryDescription.setText(category.getCategoryDescription());
+        txtCategoryName.setText(category.getCategoryName());
     }
 
     /**
@@ -108,10 +136,10 @@ public class ProductCategoryItem extends javax.swing.JPanel {
                         .addComponent(jButton4))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtCategoryName, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtCategoryDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtCategoryName, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtCategoryCode, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel3Layout.createSequentialGroup()
@@ -155,15 +183,12 @@ public class ProductCategoryItem extends javax.swing.JPanel {
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         // TODO add your handling code here:
-        Window parentWindow = SwingUtilities.getWindowAncestor(this);
-        UpdateProductCategoryJDialog dialog = new UpdateProductCategoryJDialog((Frame) parentWindow, true, category); // true = modal
-        dialog.setLocationRelativeTo(null); // căn giữa so với JPanel
-        dialog.setVisible(true);
+
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_btnDeleteActionPerformed
 
 

@@ -17,4 +17,6 @@ public class Employee {
     private String status;
     private String email;
     private String role;
+    private Date createdAt;
+    private Date updatedAt;
 }

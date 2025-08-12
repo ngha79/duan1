@@ -1,7 +1,10 @@
 package supermartket.dao.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import supermartket.dao.EmployeeDAO;
+import supermartket.dao.dto.PageDTO;
+import supermartket.dao.dto.SearchEmployeeDTO;
 import supermartket.entity.Employee;
 import supermartket.util.XJdbc;
 import supermartket.util.XQuery;
@@ -13,7 +16,23 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     private final String deleteSql = "DELETE FROM Employee WHERE EmployeeID = ?";
     private final String findByNameSql = "SELECT * FROM Employee WHERE FullName LIKE ?";
     private final String findByIdSql = "SELECT * FROM Employee WHERE EmployeeID = ?";
-    private final String findAllSql = "SELECT * FROM Employee";
+    private final String findAllSql = "SELECT * FROM Employee;";
+    private final String findSearchSql = """
+                                    SELECT * FROM Employee
+                                    WHERE 
+                                      (? IS NULL OR FullName LIKE ?) AND
+                                      (? IS NULL OR Status = ?)
+                                    ORDER BY EmployeeID
+                                    OFFSET (? - 1) * 10 ROWS
+                                    FETCH NEXT 10 ROWS ONLY
+                                    """;
+    private final String getTotalItemSql = """
+                                    SELECT count(*) as count FROM Employee
+                                    WHERE 
+                                      (? IS NULL OR FullName LIKE ?) AND
+                                      (? IS NULL OR Status = ?)
+                                    
+                                    """;
 
     @Override
     public Employee create(Employee entity) {
@@ -25,8 +44,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
             entity.getEmail(),
             entity.getStartDate(),
             entity.getStatus(),
-            entity.getGender(),
-        };
+            entity.getGender(),};
         XJdbc.executeUpdate(insertSql, values);
         return entity;
     }
@@ -52,8 +70,17 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     }
 
     @Override
-    public List<Employee> findAll() {
-        return XQuery.getBeanList(Employee.class, findAllSql);
+    public List<Employee> findAll(SearchEmployeeDTO dto) {
+        StringBuilder sql = new StringBuilder(findSearchSql);
+        List<Object> params = new ArrayList<>();
+        params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%"); // param 1
+        params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%"); // param 2
+
+        params.add(dto.getStatus());
+        params.add(dto.getStatus());
+
+        params.add(dto.getPage());
+        return XQuery.getBeanList(Employee.class, sql.toString(), params.toArray());
     }
 
     @Override
@@ -61,4 +88,20 @@ public class EmployeeDAOImpl implements EmployeeDAO {
         return XQuery.getSingleBean(Employee.class, findByIdSql, id);
     }
 
+    @Override
+    public List<Employee> findAll() {
+        return XQuery.getBeanList(Employee.class, findAllSql);
+    }
+
+    @Override
+    public PageDTO getTotalItem(SearchEmployeeDTO dto) {
+        StringBuilder sql = new StringBuilder(getTotalItemSql);
+        List<Object> params = new ArrayList<>();
+        params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%"); // param 1
+        params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%"); // param 2
+
+        params.add(dto.getStatus());
+        params.add(dto.getStatus());
+        return XQuery.getSingleBean(PageDTO.class, sql.toString(), params.toArray());
+    }
 }

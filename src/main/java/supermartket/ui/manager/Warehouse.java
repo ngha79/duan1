@@ -4,17 +4,92 @@
  */
 package supermartket.ui.manager;
 
-/**
- *
- * @author hanguyen
- */
-public class Warehouse extends javax.swing.JPanel {
+import java.awt.Frame;
+import java.util.List;
+import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+import supermartket.dao.CreateListener;
+import supermartket.dao.ImportReceiptDAO;
+import supermartket.dao.JPanelManager;
+import supermartket.dao.SupplierDAO;
+import supermartket.dao.dto.ImportReceiptDTO;
+import supermartket.dao.dto.InfoReceipt;
+import supermartket.dao.dto.SearchImportReceiptDTO;
+import supermartket.dao.impl.ImportReceiptDAOImpl;
+import supermartket.dao.impl.SupplierDAOImpl;
+import supermartket.entity.Supplier;
+import supermartket.excel.ExcelExporterReceipt;
+import supermartket.pagination.EventPagination;
+import supermartket.ui.comp.ActionCellImportReceiptEditor;
+import supermartket.ui.comp.ActionCellImportReceiptRenderer;
+import supermartket.ui.form.CreateImportReceiptJDialog;
+import supermartket.ui.form.UpdateImportReceiptJDialog;
 
-    /**
-     * Creates new form Warehouse
-     */
+public class Warehouse extends javax.swing.JPanel implements JPanelManager<Warehouse, String> {
+
+    int currentPage = 1;
+
+    ImportReceiptDAO dao = new ImportReceiptDAOImpl();
+    SupplierDAO supDao = new SupplierDAOImpl();
+    List<Supplier> listSup = supDao.findAll();
+
     public Warehouse() {
         initComponents();
+        ActionCellImportReceiptEditor editor = new ActionCellImportReceiptEditor(tblImportReceipt, this, "Sửa");
+        tblImportReceipt.setRowHeight(55);
+        tblImportReceipt.getColumnModel().getColumn(6).setCellRenderer(new ActionCellImportReceiptRenderer("Sửa"));
+        tblImportReceipt.getColumnModel().getColumn(6).setCellEditor(editor);
+
+        InfoReceipt infoReceipt = dao.getTotalByStatus();
+        txtToday.setText(infoReceipt.getSoPhieuNhapHomNay().toString());
+        txtPrice.setText("Tổng giá trị: " + infoReceipt.getTongGiaTriHomNay());
+        txtTotalReceiptStatus.setText(infoReceipt.getChoDuyet().toString());
+        txtSuccess.setText(infoReceipt.getDaHoanThanh().toString());
+
+        pagination1.addEventPagination(new EventPagination() {
+            @Override
+            public void pageChanged(int page) {
+                fillTable(page);
+                currentPage = page;
+            }
+
+        });
+        fillTable(currentPage);
+    }
+
+    public void fillTable(int page) {
+        String status = cboStatus.getSelectedItem().toString();
+        Supplier sup = listSup.stream().filter(s -> s.getSupplierName().equalsIgnoreCase(cboSupplier.getSelectedItem().toString())).findFirst().orElse(null);
+        SearchImportReceiptDTO dto = new SearchImportReceiptDTO(txtSearch.getText().trim(), status.equalsIgnoreCase("Tất cả") ? null : status, sup == null ? null : sup.getSupplierID(), page);
+        List<ImportReceiptDTO> listIR = dao.findAllBySearch(dto);
+        fillToTable(listIR);
+        int count = dao.getTotalItem(dto).getCount();
+        int limit = 10;
+        int totalPage = (int) Math.ceil(count / limit);
+        pagination1.setPagegination(page, totalPage);
+    }
+
+    public void fillToTable(List<ImportReceiptDTO> list) {
+        DefaultTableModel tbl = (DefaultTableModel) tblImportReceipt.getModel();
+        tbl.setRowCount(0);
+
+        for (Supplier supplier : listSup) {
+            cboSupplier.addItem(supplier.getSupplierName());
+        }
+
+        for (ImportReceiptDTO importReceiptDTO : list) {
+            Supplier sup = listSup.stream().filter(s -> s.getSupplierID().equalsIgnoreCase(importReceiptDTO.getSupplierID())).findFirst().orElse(null);
+
+            Object[] values = {
+                importReceiptDTO.getReceiptID(),
+                importReceiptDTO.getImportDate(),
+                sup.getSupplierName(),
+                importReceiptDTO.getQuantity(),
+                importReceiptDTO.getTotalPrice(),
+                importReceiptDTO.getStatus(),};
+            tbl.addRow(values);
+        }
     }
 
     /**
@@ -29,25 +104,31 @@ public class Warehouse extends javax.swing.JPanel {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnCreate = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        btnCreate1 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel13 = new javax.swing.JLabel();
+        txtPrice = new javax.swing.JLabel();
+        txtToday = new javax.swing.JLabel();
         jPanel7 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
+        txtTotalReceiptStatus = new javax.swing.JLabel();
         jPanel8 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
+        txtSuccess = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         jPanel9 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblImportReceipt = new javax.swing.JTable();
+        txtSearch = new javax.swing.JTextField();
+        cboSupplier = new javax.swing.JComboBox<>();
+        btnSearch = new javax.swing.JButton();
+        cboStatus = new javax.swing.JComboBox<>();
+        pagination1 = new supermartket.pagination.Pagination();
 
         jPanel1.setPreferredSize(new java.awt.Dimension(1098, 829));
 
@@ -56,13 +137,27 @@ public class Warehouse extends javax.swing.JPanel {
         jLabel2.setFont(new java.awt.Font("Roboto", 1, 22)); // NOI18N
         jLabel2.setText("Quản lý nhập hàng");
 
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-plus-24.png"))); // NOI18N
-        jButton1.setText("Tạo phiếu nhập");
+        btnCreate.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btnCreate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-plus-24.png"))); // NOI18N
+        btnCreate.setText("Tạo phiếu nhập");
+        btnCreate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateActionPerformed(evt);
+            }
+        });
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(51, 51, 51));
         jLabel1.setText("Tạo phiếu nhập và cập nhật tồn kho");
+
+        btnCreate1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btnCreate1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-plus-24.png"))); // NOI18N
+        btnCreate1.setText("Xuất Excel");
+        btnCreate1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreate1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -77,7 +172,9 @@ public class Warehouse extends javax.swing.JPanel {
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1)))
+                        .addComponent(btnCreate1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnCreate)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -86,7 +183,8 @@ public class Warehouse extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnCreate, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCreate1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -100,12 +198,12 @@ public class Warehouse extends javax.swing.JPanel {
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel3.setText("Phiếu nhập hôm nay");
 
-        jLabel5.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel5.setText("Tổng giá trị: 45,000,000đ");
+        txtPrice.setForeground(new java.awt.Color(102, 102, 102));
+        txtPrice.setText("Tổng giá trị: ");
 
-        jLabel13.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel13.setText("3");
+        txtToday.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        txtToday.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        txtToday.setText("3");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -116,13 +214,13 @@ public class Warehouse extends javax.swing.JPanel {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addGap(6, 6, 6)
-                        .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtToday, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
                             .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
@@ -132,9 +230,9 @@ public class Warehouse extends javax.swing.JPanel {
                 .addGap(12, 12, 12)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtToday, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
+                .addComponent(txtPrice, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -149,9 +247,9 @@ public class Warehouse extends javax.swing.JPanel {
         jLabel8.setForeground(new java.awt.Color(102, 102, 102));
         jLabel8.setText("Phiếu nhập chờ duyệt");
 
-        jLabel12.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel12.setText("3");
+        txtTotalReceiptStatus.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        txtTotalReceiptStatus.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        txtTotalReceiptStatus.setText("3");
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -162,7 +260,7 @@ public class Warehouse extends javax.swing.JPanel {
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addGap(6, 6, 6)
-                        .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtTotalReceiptStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -178,7 +276,7 @@ public class Warehouse extends javax.swing.JPanel {
                 .addGap(12, 12, 12)
                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtTotalReceiptStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
                 .addContainerGap())
@@ -192,9 +290,9 @@ public class Warehouse extends javax.swing.JPanel {
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel9.setText("Đã hoàn thành");
 
-        jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel10.setText("156");
+        txtSuccess.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        txtSuccess.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        txtSuccess.setText("156");
 
         jLabel11.setForeground(new java.awt.Color(102, 102, 102));
         jLabel11.setText("Phiếu nhập tháng này");
@@ -208,7 +306,7 @@ public class Warehouse extends javax.swing.JPanel {
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addGap(6, 6, 6)
-                        .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSuccess, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -224,7 +322,7 @@ public class Warehouse extends javax.swing.JPanel {
                 .addGap(12, 12, 12)
                 .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtSuccess, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
                 .addContainerGap())
@@ -238,18 +336,29 @@ public class Warehouse extends javax.swing.JPanel {
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 22)); // NOI18N
         jLabel4.setText("Lịch sử nhập hàng");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblImportReceipt.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã phiếu", "Ngày nhập", "Nhà cung cấp", "Số lượng SP", "Tổng giá trị", "Người nhập", "Trạng thái", "Thao tác"
+                "Mã phiếu", "Ngày nhập", "Nhà cung cấp", "Số lượng SP", "Tổng giá trị", "Trạng thái", "Thao tác"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tblImportReceipt);
+
+        cboSupplier.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tất cả" }));
+
+        btnSearch.setText("Lọc");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+
+        cboStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tất cả", "Đã duyệt", "Chờ duyệt ", "Từ chối" }));
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
@@ -258,10 +367,20 @@ public class Warehouse extends javax.swing.JPanel {
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1092, Short.MAX_VALUE)
                     .addGroup(jPanel9Layout.createSequentialGroup()
                         .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 345, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1))
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(cboSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cboStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnSearch)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pagination1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel9Layout.setVerticalGroup(
@@ -269,8 +388,16 @@ public class Warehouse extends javax.swing.JPanel {
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE)
+                        .addComponent(cboSupplier, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(btnSearch, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cboStatus, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addComponent(pagination1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(9, 9, 9)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 474, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -306,23 +433,52 @@ public class Warehouse extends javax.swing.JPanel {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(0, 0, 0))
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
+        // TODO add your handling code here:
+        CreateImportReceiptJDialog createImportReceipt = new CreateImportReceiptJDialog((Frame) SwingUtilities.getWindowAncestor(this), true, new CreateListener() {
+            @Override
+            public void onCreate() {
+                fillTable(1);
+            }
+        });
+        createImportReceipt.setLocationRelativeTo(null);
+        createImportReceipt.setVisible(true);
+    }//GEN-LAST:event_btnCreateActionPerformed
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // TODO add your handling code here:
+        fillTable(1);
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnCreate1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreate1ActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+            if (!filePath.endsWith(".xlsx")) {
+                filePath += ".xlsx";
+            }
+            ExcelExporterReceipt.exportTableToExcel(tblImportReceipt, dao.findAll(), filePath);
+        }
+    }//GEN-LAST:event_btnCreate1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnCreate;
+    private javax.swing.JButton btnCreate1;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JComboBox<String> cboStatus;
+    private javax.swing.JComboBox<String> cboSupplier;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
@@ -334,6 +490,29 @@ public class Warehouse extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private supermartket.pagination.Pagination pagination1;
+    private javax.swing.JTable tblImportReceipt;
+    private javax.swing.JLabel txtPrice;
+    private javax.swing.JTextField txtSearch;
+    private javax.swing.JLabel txtSuccess;
+    private javax.swing.JLabel txtToday;
+    private javax.swing.JLabel txtTotalReceiptStatus;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void delete(String id) {
+    }
+
+    @Override
+    public void update(String id) {
+        ImportReceiptDTO ip = dao.findById(id);
+        UpdateImportReceiptJDialog dialog = new UpdateImportReceiptJDialog(null, true, ip, new CreateListener() {
+            @Override
+            public void onCreate() {
+                fillTable(currentPage);
+            }
+        });
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
 }

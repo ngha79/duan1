@@ -7,11 +7,12 @@ import supermartket.util.XJdbc;
 import supermartket.util.XQuery;
 
 public class ProductCategoryDAOImpl implements ProductCategoryDAO {
+
     private String insertSql = "INSERT INTO ProductCategory VALUES(?,?,?)";
-    private String updateSql = "UPDATE ProductCategory SET CategoryName = ?, CategoryDescription = ? WHERE CategoryCode = ?";
-    private String deleteSql = "DELETE FROM ProductCategory WHERE CategoryCode = ?";
-    private String findByNameSql = "SELECT * FROM ProductCategory WHERE CategoryName LIKE ?";
-    private String findByIdSql = "SELECT * FROM ProductCategory WHERE CategoryCode = ?";
+    private String updateSql = "UPDATE ProductCategory SET CategoryName = ?, CategoryDescription = ? WHERE CategoryID = ?";
+    private String deleteSql = "DELETE FROM ProductCategory WHERE CategoryID = ?";
+    private String findByNameSql = "SELECT * FROM ProductCategory WHERE CategoryName LIKE ? OR CategoryDescription LIKE ?";
+    private String findByIdSql = "SELECT * FROM ProductCategory WHERE CategoryID = ?";
     private String findAllSql = "SELECT * FROM ProductCategory";
 
     @Override
@@ -27,9 +28,9 @@ public class ProductCategoryDAOImpl implements ProductCategoryDAO {
     @Override
     public void update(ProductCategory entity) {
         Object[] values = {
-            entity.getCategoryID(),
             entity.getCategoryName(),
-            entity.getCategoryDescription(),};
+            entity.getCategoryDescription(),
+            entity.getCategoryID(),};
         XJdbc.executeUpdate(updateSql, values);
     }
 
@@ -44,8 +45,11 @@ public class ProductCategoryDAOImpl implements ProductCategoryDAO {
     }
 
     @Override
-    public List<ProductCategory> findAllByName(String name) {
-        return XQuery.getBeanList(ProductCategory.class, findByNameSql, name);
+    public List<ProductCategory> findAllByName(String search) {
+        Object[] values = {
+            "%" + search + "%",
+            "%" + search + "%",};
+        return XQuery.getBeanList(ProductCategory.class, findByNameSql, values);
     }
 
     @Override

@@ -4,9 +4,10 @@
  */
 package supermartket.dao;
 
+import java.util.List;
 import supermartket.entity.User;
 
 
 public interface UserDAO extends CrudDAO<User, String>{
-    
+     List<User> findByName(String name);
 }

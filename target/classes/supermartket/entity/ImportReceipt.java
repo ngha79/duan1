@@ -10,9 +10,8 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class ImportReceipt {
-    private Integer receiptID;
+    private String receiptID;
     private Date importDate;
-    private Integer employeeID;
-    private Integer supplierID;
-    private Integer paymentTypeId;
+    private String supplierID;
+    private String status;
 }

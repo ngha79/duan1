@@ -6,31 +6,45 @@ package supermartket.ui.manager;
 
 import java.awt.Frame;
 import java.util.List;
+import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import supermartket.dao.CreateListener;
 import supermartket.dao.JPanelManager;
 import supermartket.dao.SupplierDAO;
+import supermartket.dao.dto.SupplierDTO;
 import supermartket.dao.impl.SupplierDAOImpl;
 import supermartket.entity.Supplier;
+import supermartket.excel.ExcelExporterSupplier;
+import supermartket.pagination.EventPagination;
 import supermartket.ui.comp.ActionCellEditor;
 import supermartket.ui.comp.ActionCellRenderer;
 import supermartket.ui.form.CreateSupplierJDialog;
 import supermartket.ui.form.UpdateSupplierJDialog;
 
-public class SupplierManager extends javax.swing.JPanel implements JPanelManager<Supplier, String>{
+public class SupplierManager extends javax.swing.JPanel implements JPanelManager<Supplier, String> {
+
     SupplierDAO dao = new SupplierDAOImpl();
+    int currentPage = 1;
 
     /**
      * Creates new form Supplier
      */
     public SupplierManager() {
         initComponents();
-        filltoTable();
         ActionCellEditor editor = new ActionCellEditor(tblSupplier, this);
-        tblSupplier.setRowHeight(40);
+        tblSupplier.setRowHeight(65);
         tblSupplier.getColumnModel().getColumn(6).setCellRenderer(new ActionCellRenderer());
         tblSupplier.getColumnModel().getColumn(6).setCellEditor(editor);
+        pagination1.addEventPagination(new EventPagination() {
+            @Override
+            public void pageChanged(int page) {
+                filltoTable(page);
+                currentPage = page;
+            }
+
+        });
+        filltoTable(currentPage);
     }
 
     /**
@@ -47,8 +61,13 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
         jLabel2 = new javax.swing.JLabel();
         btnCreate = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        btnExcel = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblSupplier = new javax.swing.JTable();
+        txtSearch = new javax.swing.JTextField();
+        btnSearch = new javax.swing.JButton();
+        pagination1 = new supermartket.pagination.Pagination();
+        cboStatus = new javax.swing.JComboBox<>();
 
         jPanel1.setPreferredSize(new java.awt.Dimension(1098, 829));
 
@@ -57,7 +76,7 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
         jLabel2.setFont(new java.awt.Font("Roboto", 1, 22)); // NOI18N
         jLabel2.setText("Quản lý nhà cung cấp");
 
-        btnCreate.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
+        btnCreate.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnCreate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-plus-24.png"))); // NOI18N
         btnCreate.setText("Thêm nhà cung cấp");
         btnCreate.addActionListener(new java.awt.event.ActionListener() {
@@ -70,6 +89,13 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
         jLabel1.setForeground(new java.awt.Color(51, 51, 51));
         jLabel1.setText("Thông tin liên hệ và hợp tác với nhà cung cấp");
 
+        btnExcel.setText("Xuất Excel");
+        btnExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcelActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -79,7 +105,9 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 314, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 575, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnExcel)
+                .addGap(18, 18, 18)
                 .addComponent(btnCreate)
                 .addGap(14, 14, 14))
         );
@@ -94,7 +122,9 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(15, 15, 15)
-                        .addComponent(btnCreate, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnCreate, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -111,19 +141,47 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
         ));
         jScrollPane1.setViewportView(tblSupplier);
 
+        btnSearch.setText("Lọc");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+
+        cboStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Trạng thái" }));
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane1)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 298, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cboStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnSearch)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 433, Short.MAX_VALUE)
+                        .addComponent(pagination1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(pagination1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cboStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 753, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 710, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -134,38 +192,59 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
         // TODO add your handling code here:
-        CreateSupplierJDialog createSupplier = new CreateSupplierJDialog((Frame) SwingUtilities.getWindowAncestor(this), true,new CreateListener() {
+        CreateSupplierJDialog createSupplier = new CreateSupplierJDialog((Frame) SwingUtilities.getWindowAncestor(this), true, new CreateListener() {
             @Override
             public void onCreate() {
-                filltoTable();
+                filltoTable(1);
             }
         });
         createSupplier.setLocationRelativeTo(null);
         createSupplier.setVisible(true);
     }//GEN-LAST:event_btnCreateActionPerformed
 
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // TODO add your handling code here:
+        filltoTable(1);
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcelActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+            if (!filePath.endsWith(".xlsx")) {
+                filePath += ".xlsx";
+            }
+            String sql = "SELECT * FROM Product"; // đổi sang câu lệnh bạn cần
+            ExcelExporterSupplier.exportTableToExcel(tblSupplier, dao.findAll(), filePath);
+        }
+    }//GEN-LAST:event_btnExcelActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCreate;
+    private javax.swing.JButton btnExcel;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JComboBox<String> cboStatus;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private supermartket.pagination.Pagination pagination1;
     private javax.swing.JTable tblSupplier;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 
-    @Override
-    public void filltoTable() {
-        List<Supplier> list = dao.findAll();
+    public void filltoTable(int page) {
+        SupplierDTO dto = new SupplierDTO(txtSearch.getText().trim(), cboStatus.getSelectedItem().toString().equalsIgnoreCase("Trạng thái") ? null : cboStatus.getSelectedItem().toString(), page);
+        List<Supplier> list = dao.findAllByName(dto);
         DefaultTableModel table = (DefaultTableModel) tblSupplier.getModel();
         table.setNumRows(0);
         for (Supplier supplier : list) {
@@ -178,12 +257,16 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
                 supplier.getStatus() ? "Đang hợp tác" : "Ngừng hợp tác",};
             table.addRow(values);
         }
+        int count = dao.getTotalItem(dto).getCount();
+        int limit = 10;
+        int totalPage = (int) Math.ceil(count / limit);
+        pagination1.setPagegination(page, totalPage);
     }
 
     @Override
     public void delete(String id) {
         dao.deleteById(id);
-        filltoTable();
+        filltoTable(currentPage);
     }
 
     @Override
@@ -192,6 +275,6 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
         UpdateSupplierJDialog dialog = new UpdateSupplierJDialog(null, true, cus);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
-        filltoTable();
+        filltoTable(currentPage);
     }
 }

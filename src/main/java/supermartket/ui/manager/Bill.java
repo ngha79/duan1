@@ -4,17 +4,111 @@
  */
 package supermartket.ui.manager;
 
-/**
- *
- * @author hanguyen
- */
-public class Bill extends javax.swing.JPanel {
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import javax.swing.JFileChooser;
+import javax.swing.table.DefaultTableModel;
+import supermartket.dao.CustomerDAO;
+import supermartket.dao.EmployeeDAO;
+import supermartket.dao.JPanelManager;
+import supermartket.dao.dto.InvoiceDTO;
+import supermartket.dao.dto.SearchInvoiceDTO;
+import supermartket.dao.impl.CustomerDAOImpl;
+import supermartket.dao.impl.EmployeeDAOImpl;
+import supermartket.dao.impl.InvoiceDAOImpl;
+import supermartket.entity.Customer;
+import supermartket.entity.Employee;
+import supermartket.entity.Invoice;
+import supermartket.excel.ExcelExporterInvoice;
+import supermartket.pagination.EventPagination;
+import supermartket.pagination.style.PaginationItemRenderStyle1;
+import supermartket.ui.comp.ActionCellImportReceiptEditor;
+import supermartket.ui.comp.ActionCellImportReceiptRenderer;
+import supermartket.ui.form.InvoiceDetailJDialog;
+
+public final class Bill extends javax.swing.JPanel implements JPanelManager<Invoice, String> {
+
+    InvoiceDAOImpl dao = new InvoiceDAOImpl();
+    EmployeeDAO empDao = new EmployeeDAOImpl();
+    CustomerDAO cusDao = new CustomerDAOImpl();
+    List<Invoice> list = List.of();
+    List<Employee> listEmp = empDao.findAll();
+    List<Customer> listCus = cusDao.findAll();
 
     /**
      * Creates new form Bill
      */
     public Bill() {
         initComponents();
+        ActionCellImportReceiptEditor editor = new ActionCellImportReceiptEditor(tblInvoice, this, "Chi tiết");
+        tblInvoice.setRowHeight(60);
+        tblInvoice.getColumnModel().getColumn(9).setCellRenderer(new ActionCellImportReceiptRenderer("Chi tiết"));
+        tblInvoice.getColumnModel().getColumn(9).setCellEditor(editor);
+        for (Employee emp : listEmp) {
+            cboEmployee.addItem(emp.getFullName());
+        }
+        pagination1.addEventPagination(new EventPagination() {
+            @Override
+            public void pageChanged(int page) {
+                fill(page);
+            }
+
+        });
+        
+        fill(1);
+    }
+
+    private void fill(int page) {
+        String search = txtSearch.getText().trim();
+        String employeeId = listEmp.stream().filter(e -> e.getFullName().equalsIgnoreCase(cboEmployee.getSelectedItem().toString())).findFirst().map(e -> e.getEmployeeID()).orElse(null);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        LocalDate fromDate = null;
+        LocalDate toDate = null;
+
+        String fromText = txtStartDate.getText().trim();
+        String toText = txtEndDate.getText().trim();
+
+        if (!fromText.isEmpty()) {
+            fromDate = LocalDate.parse(fromText, formatter);
+        }
+
+        if (!toText.isEmpty()) {
+            toDate = LocalDate.parse(toText, formatter);
+        }
+
+        java.sql.Date sqlFromDate = (fromDate != null) ? java.sql.Date.valueOf(fromDate) : null;
+        java.sql.Date sqlToDate = (toDate != null) ? java.sql.Date.valueOf(toDate) : null;
+        SearchInvoiceDTO dto = new SearchInvoiceDTO(search, employeeId, sqlFromDate, sqlToDate, page);
+        List<Invoice> listInvoice = dao.findBySearchEmployeeAndDate(dto);
+        int count = dao.getTotalItem(dto).getCount();
+        int limit = 10;
+        int totalPage = (int) Math.ceil(count / limit);
+        pagination1.setPagegination(page, totalPage);
+        fillToTable(listInvoice);
+    }
+
+
+    public void fillToTable(List<Invoice> listInvoice) {
+        DefaultTableModel tbl = (DefaultTableModel) tblInvoice.getModel();
+        tbl.setNumRows(0);
+        for (Invoice invoice : listInvoice) {
+            String emplyeeName = listEmp.stream().filter(e -> e.getEmployeeID().equalsIgnoreCase(invoice.getEmployeeID())).findFirst().map(e -> e.getFullName()).orElse(null);
+            String customerName = listCus.stream().filter(c -> c.getCustomerID().equalsIgnoreCase(invoice.getCustomerID())).findFirst().map(c -> c.getFullName()).orElse(null);
+            Object[] values = {
+                invoice.getInvoiceID(),
+                invoice.getInvoiceDate(),
+                invoice.getInvoiceTime(),
+                customerName,
+                emplyeeName,
+                invoice.getTotalQuantity(),
+                invoice.getTotalAmount(),
+                invoice.getPaymentMethod(),
+                invoice.getStatus()
+            };
+            tbl.addRow(values);
+        }
     }
 
     /**
@@ -29,15 +123,17 @@ public class Bill extends javax.swing.JPanel {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
+        btnExportExcel = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jTextField2 = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
+        cboEmployee = new javax.swing.JComboBox<>();
+        txtStartDate = new javax.swing.JTextField();
+        btnSearch = new javax.swing.JButton();
+        txtEndDate = new javax.swing.JTextField();
+        pagination1 = new supermartket.pagination.Pagination();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblInvoice = new javax.swing.JTable();
 
         jPanel1.setPreferredSize(new java.awt.Dimension(1098, 829));
 
@@ -46,14 +142,16 @@ public class Bill extends javax.swing.JPanel {
         jLabel2.setFont(new java.awt.Font("Roboto", 1, 22)); // NOI18N
         jLabel2.setText("Quản lý hóa đơn");
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-plus-24.png"))); // NOI18N
-        jButton1.setText("Tạo hóa đơn");
-
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel1.setText("Lịch sử và chi tiết các giao dịch bán hàng");
 
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-plus-24.png"))); // NOI18N
-        jButton2.setText("Xuất Excel");
+        btnExportExcel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-plus-24.png"))); // NOI18N
+        btnExportExcel.setText("Xuất Excel");
+        btnExportExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportExcelActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -64,13 +162,12 @@ public class Bill extends javax.swing.JPanel {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 314, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton2)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton1))))
+                        .addComponent(btnExportExcel)))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -78,44 +175,61 @@ public class Bill extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnExportExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jTextField1.setText("Search");
+        txtSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtSearchActionPerformed(evt);
+            }
+        });
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cboEmployee.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tất cả nhân viên" }));
 
-        jTextField2.setText("Date");
+        btnSearch.setText("Lọc");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(432, Short.MAX_VALUE))
+                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cboEmployee, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSearch)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
+                .addComponent(pagination1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(18, 18, 18)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pagination1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cboEmployee, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(19, Short.MAX_VALUE))
         );
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblInvoice.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null, null, null},
@@ -126,7 +240,8 @@ public class Bill extends javax.swing.JPanel {
                 "Mã HĐ", "Ngày", "Giờ", "Khách hàng", "Nhân viên", "Số lượng", "Tổng tiền", "Thanh toán", "Trạng thái", "Thao tác"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        tblInvoice.setRowHeight(60);
+        jScrollPane1.setViewportView(tblInvoice);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -134,13 +249,10 @@ public class Bill extends javax.swing.JPanel {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addComponent(jScrollPane1)))
+                    .addComponent(jScrollPane1)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -162,23 +274,58 @@ public class Bill extends javax.swing.JPanel {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 830, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void txtSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtSearchActionPerformed
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // TODO add your handling code here:
+        fill(1);
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnExportExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportExcelActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+            if (!filePath.endsWith(".xlsx")) {
+                filePath += ".xlsx";
+            }
+            ExcelExporterInvoice.exportTableToExcel(tblInvoice, dao.findAll(), filePath);
+        }
+    }//GEN-LAST:event_btnExportExcelActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JButton btnExportExcel;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JComboBox<String> cboEmployee;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private supermartket.pagination.Pagination pagination1;
+    private javax.swing.JTable tblInvoice;
+    private javax.swing.JTextField txtEndDate;
+    private javax.swing.JTextField txtSearch;
+    private javax.swing.JTextField txtStartDate;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void delete(String id) {
+    }
+
+    @Override
+    public void update(String id) {
+        Invoice ip = dao.findById(id);
+        InvoiceDetailJDialog dialog = new InvoiceDetailJDialog(null, true, ip);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
 }

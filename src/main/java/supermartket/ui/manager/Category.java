@@ -5,6 +5,7 @@
 package supermartket.ui.manager;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridLayout;
@@ -21,6 +22,7 @@ import supermartket.ui.comp.ProductCategoryItem;
 import supermartket.ui.form.CreateProductCategoryJDialog;
 
 public class Category extends javax.swing.JPanel {
+
     ProductCategoryDAO dao = new ProductCategoryDAOImpl();
 
     /**
@@ -28,8 +30,8 @@ public class Category extends javax.swing.JPanel {
      */
     public Category() {
         initComponents();
-        loadCards();
-
+        List<ProductCategory> categories = dao.findAll();
+        loadCards(categories);
     }
 
     /**
@@ -48,6 +50,8 @@ public class Category extends javax.swing.JPanel {
         btnCreate = new javax.swing.JButton();
         mainPanel = new javax.swing.JPanel();
         pnlCategories = new javax.swing.JPanel();
+        txtSearch = new javax.swing.JTextField();
+        btnSearch = new javax.swing.JButton();
 
         setPreferredSize(new java.awt.Dimension(1098, 829));
 
@@ -108,8 +112,15 @@ public class Category extends javax.swing.JPanel {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addComponent(pnlCategories, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 651, Short.MAX_VALUE))
+                .addGap(0, 618, Short.MAX_VALUE))
         );
+
+        btnSearch.setText("Lọc");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout mainLayout = new javax.swing.GroupLayout(main);
         main.setLayout(mainLayout);
@@ -121,14 +132,23 @@ public class Category extends javax.swing.JPanel {
                     .addComponent(introduce, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(mainLayout.createSequentialGroup()
                         .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())))
+                        .addContainerGap())
+                    .addGroup(mainLayout.createSequentialGroup()
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 276, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnSearch)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         mainLayout.setVerticalGroup(
             mainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(introduce, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(mainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -161,28 +181,35 @@ public class Category extends javax.swing.JPanel {
         createProductCategory.setVisible(true);
     }//GEN-LAST:event_btnCreateActionPerformed
 
-    private void loadCards() {
-        List<ProductCategory> categories = dao.findAll();
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // TODO add your handling code here:
+        List<ProductCategory> categories = dao.findAllByName(txtSearch.getText().trim());
+        loadCards(categories);
+    }//GEN-LAST:event_btnSearchActionPerformed
 
+    private void loadCards(List<ProductCategory> categories) {
+        mainPanel.removeAll();
+        pnlCategories.removeAll();
         pnlCategories.setLayout(new BorderLayout());
-
         JPanel pnlGrid = new JPanel();
         pnlGrid.setLayout(new GridLayout(0, 3, 20, 20));
-
         categories.forEach(card -> pnlGrid.add(this.createButton(card)));
-
         int itemHeight = 170;
-        int rows = (int) Math.ceil(categories.size() / 3.0); 
-        int totalHeight = rows * (itemHeight + 20); 
-
+        int rows = (int) Math.ceil(categories.size() / 3.0);
+        int totalHeight = rows * (itemHeight + 20);
         pnlGrid.setPreferredSize(new Dimension(0, totalHeight));
-        pnlCategories.add(pnlGrid, BorderLayout.NORTH); 
-
+        pnlCategories.add(pnlGrid, BorderLayout.NORTH);
         JScrollPane scrollPane = new JScrollPane(pnlCategories);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(scrollPane, BorderLayout.CENTER);
+        pnlCategories.setBorder(null);
+        mainPanel.setBorder(null);
+        pnlCategories.revalidate();
+        pnlCategories.repaint();
+        mainPanel.revalidate();
+        mainPanel.repaint();
     }
 
     private JPanel createButton(ProductCategory category) { // tạo Jbutton cho thẻ 
@@ -191,30 +218,66 @@ public class Category extends javax.swing.JPanel {
             public void onDelete(ProductCategoryItem categoryItem) {
                 deleteCategory(categoryItem);
             }
+
+            @Override
+            public void onUpdate(ProductCategoryItem categoryItem, ProductCategory item) {
+                updateCategory(categoryItem, item);
+            }
         });
         cateItem.setPreferredSize(new Dimension(0, 80));
+        cateItem.setName(category.getCategoryID());
         return cateItem;
     }
 
+    public void updateCategory(JPanel panel, ProductCategory card) {
+        JPanel parentPanel = (JPanel) pnlCategories.getComponent(0);
+
+        for (int i = 0; i < parentPanel.getComponentCount(); i++) {
+            Component comp = parentPanel.getComponent(i);
+
+            if (comp.getName() != null && comp.getName().equals(panel.getName())) {
+
+                panel.setName(card.getCategoryID());
+
+                parentPanel.remove(i);
+                parentPanel.add(this.createButton(card), i);
+
+                parentPanel.revalidate();
+                parentPanel.repaint();
+                return;
+            }
+        }
+
+    }
+
     public void deleteCategory(JPanel panel) {
-        pnlCategories.remove(panel);
-        pnlCategories.revalidate();
-        pnlCategories.repaint();
+        if (pnlCategories.getComponentCount() > 0) {
+            JPanel parentPanel = (JPanel) pnlCategories.getComponent(0);
+            parentPanel.remove(panel);
+            parentPanel.revalidate();
+            parentPanel.repaint();
+        }
     }
 
     public void createCategory(JPanel panel) {
-        pnlCategories.add(panel);
-        pnlCategories.revalidate();
-        pnlCategories.repaint();
+        if (pnlCategories.getComponentCount() > 0) {
+            JPanel parentPanel = (JPanel) pnlCategories.getComponent(0);
+            parentPanel.add(panel);
+            parentPanel.revalidate();
+            parentPanel.repaint();
+        }
     }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCreate;
+    private javax.swing.JButton btnSearch;
     private javax.swing.JPanel introduce;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel main;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JPanel pnlCategories;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 }

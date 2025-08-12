@@ -32,16 +32,12 @@ public class MainJFrame extends javax.swing.JFrame {
 
     private Dashboard dashboard;
     private ProductManager product = new ProductManager();
-    private Bill bill = new Bill();
     private Category category = new Category();
     private CustomerManager customer = new CustomerManager();
     private Sell sell = new Sell();
     private EmployeeManager staff = new EmployeeManager();
     private SupplierManager supplier = new SupplierManager();
     private Warehouse warehouse = new Warehouse();
-    private AnalysisReporting reporting = new AnalysisReporting();
-    private Setting setting = new Setting();
-    private UserManager users = new UserManager();
 
     public MainJFrame() {
         initComponents();
@@ -49,31 +45,29 @@ public class MainJFrame extends javax.swing.JFrame {
         dashboard = new Dashboard(mainPanel);
         this.setPanel(dashboard);
     }
-    
-    private void init(){
+
+    private void init() {
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
 //        this.showWelcomeJDialog(this);
 //        this.showLoginJDialog(this);
 //        this.setIconImage(XIcon.getIcon("/icons/trump-small.png").getImage());
-        
-       
     }
-    
+
     public void showLoginJDialog(JFrame frame) {
         this.showJDialog(new LoginJDialog(frame, true));
     }
-    
+
     public void showWelcomeJDialog(JFrame frame) {
         this.showJDialog(new WelcomeJDialog(frame, true));
     }
-    
+
     public void showJDialog(JDialog dialog) {
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
-    
+
     public void setPanel(Component panel) {
         mainPanel.removeAll();
         mainPanel.setLayout(new BorderLayout());
@@ -114,9 +108,8 @@ public class MainJFrame extends javax.swing.JFrame {
         btnStaff = new javax.swing.JButton();
         btnWarehouse = new javax.swing.JButton();
         btnReporting = new javax.swing.JButton();
-        btnSetting = new javax.swing.JButton();
-        jSeparator1 = new javax.swing.JSeparator();
         btnReporting1 = new javax.swing.JButton();
+        btnSetting = new javax.swing.JButton();
         mainPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -228,6 +221,7 @@ public class MainJFrame extends javax.swing.JFrame {
         );
 
         jPanel4.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 0, 1, new java.awt.Color(0, 0, 0)));
+        jPanel4.setLayout(new java.awt.GridLayout(0, 1));
 
         btnDashboard.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnDashboard.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-analysis-20.png"))); // NOI18N
@@ -238,6 +232,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnDashboardActionPerformed(evt);
             }
         });
+        jPanel4.add(btnDashboard);
 
         btnProduct.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnProduct.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-production-line-20.png"))); // NOI18N
@@ -248,6 +243,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnProductActionPerformed(evt);
             }
         });
+        jPanel4.add(btnProduct);
 
         btnCategory.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnCategory.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-tag-24.png"))); // NOI18N
@@ -258,6 +254,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnCategoryActionPerformed(evt);
             }
         });
+        jPanel4.add(btnCategory);
 
         btnSupplier.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnSupplier.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-supplier-24.png"))); // NOI18N
@@ -268,6 +265,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnSupplierActionPerformed(evt);
             }
         });
+        jPanel4.add(btnSupplier);
 
         btnCustomer.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnCustomer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-user-24.png"))); // NOI18N
@@ -278,6 +276,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnCustomerActionPerformed(evt);
             }
         });
+        jPanel4.add(btnCustomer);
 
         btnSell.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnSell.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-shopping-cart-24.png"))); // NOI18N
@@ -288,6 +287,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnSellActionPerformed(evt);
             }
         });
+        jPanel4.add(btnSell);
 
         btnBill.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnBill.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-bill-24.png"))); // NOI18N
@@ -298,6 +298,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnBillActionPerformed(evt);
             }
         });
+        jPanel4.add(btnBill);
 
         btnStaff.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnStaff.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-user-24.png"))); // NOI18N
@@ -308,6 +309,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnStaffActionPerformed(evt);
             }
         });
+        jPanel4.add(btnStaff);
 
         btnWarehouse.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnWarehouse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-truck-24.png"))); // NOI18N
@@ -318,6 +320,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnWarehouseActionPerformed(evt);
             }
         });
+        jPanel4.add(btnWarehouse);
 
         btnReporting.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnReporting.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-circle-chart-24.png"))); // NOI18N
@@ -328,16 +331,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnReportingActionPerformed(evt);
             }
         });
-
-        btnSetting.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
-        btnSetting.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-settings-24.png"))); // NOI18N
-        btnSetting.setText("Cài đặt");
-        btnSetting.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnSetting.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSettingActionPerformed(evt);
-            }
-        });
+        jPanel4.add(btnReporting);
 
         btnReporting1.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnReporting1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-supplier-24.png"))); // NOI18N
@@ -348,60 +342,18 @@ public class MainJFrame extends javax.swing.JFrame {
                 btnReporting1ActionPerformed(evt);
             }
         });
+        jPanel4.add(btnReporting1);
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSeparator1)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnReporting1, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSetting, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnReporting, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnStaff, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnBill, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSell, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnDashboard, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(14, Short.MAX_VALUE))
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addComponent(btnDashboard, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSell, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnBill, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnStaff, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnReporting, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnReporting1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSetting, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(236, Short.MAX_VALUE))
-        );
+        btnSetting.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnSetting.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-settings-24.png"))); // NOI18N
+        btnSetting.setText("Cài đặt");
+        btnSetting.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnSetting.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSettingActionPerformed(evt);
+            }
+        });
+        jPanel4.add(btnSetting);
 
         mainPanel.setAutoscrolls(true);
         mainPanel.setLayout(new java.awt.CardLayout());
@@ -432,7 +384,7 @@ public class MainJFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 2306, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -479,6 +431,7 @@ public class MainJFrame extends javax.swing.JFrame {
 
     private void btnBillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBillActionPerformed
         // TODO add your handling code here:
+        Bill bill = new Bill();
         setPanel(bill);
     }//GEN-LAST:event_btnBillActionPerformed
 
@@ -494,11 +447,13 @@ public class MainJFrame extends javax.swing.JFrame {
 
     private void btnReportingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportingActionPerformed
         // TODO add your handling code here:
+        AnalysisReporting reporting = new AnalysisReporting();
         setPanel(reporting);
     }//GEN-LAST:event_btnReportingActionPerformed
 
     private void btnSettingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSettingActionPerformed
         // TODO add your handling code here:
+        Setting setting = new Setting();
         setPanel(setting);
     }//GEN-LAST:event_btnSettingActionPerformed
 
@@ -511,6 +466,7 @@ public class MainJFrame extends javax.swing.JFrame {
 
     private void btnReporting1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReporting1ActionPerformed
         // TODO add your handling code here:
+        UserManager users = new UserManager();
         setPanel(users);
     }//GEN-LAST:event_btnReporting1ActionPerformed
 
@@ -575,7 +531,6 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPanel mainPanel;
     // End of variables declaration//GEN-END:variables
 }

@@ -4,9 +4,10 @@
  */
 package supermartket.dao;
 
+import java.util.List;
+
 
 public interface JPanelManager<T, ID> {
-    void filltoTable();
     void delete(ID id);
     void update(ID id);
 }

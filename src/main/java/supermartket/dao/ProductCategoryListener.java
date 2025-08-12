@@ -4,9 +4,11 @@
  */
 package supermartket.dao;
 
+import supermartket.entity.ProductCategory;
 import supermartket.ui.comp.ProductCategoryItem;
 
 
 public interface ProductCategoryListener {
     void onDelete(ProductCategoryItem category);
+    void onUpdate(ProductCategoryItem category, ProductCategory item);
 }

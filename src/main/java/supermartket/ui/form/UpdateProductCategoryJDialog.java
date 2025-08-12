@@ -4,7 +4,12 @@
  */
 package supermartket.ui.form;
 
+import javax.swing.JOptionPane;
+import supermartket.dao.CreateListener;
+import supermartket.dao.ProductCategoryListener;
+import supermartket.dao.UpdateProductCategoryListener;
 import supermartket.entity.ProductCategory;
+import supermartket.ui.comp.ProductCategoryItem;
 
 /**
  *
@@ -14,16 +19,31 @@ public class UpdateProductCategoryJDialog extends javax.swing.JDialog {
 
     /**
      * Creates new form CreateProductCategoryJDialog
+     *
      * @param parent
      * @param modal
      * @param productCategory
      */
-    public UpdateProductCategoryJDialog(java.awt.Frame parent, boolean modal, ProductCategory productCategory) {
+    public UpdateProductCategoryJDialog(java.awt.Frame parent, boolean modal,  ProductCategory productCategory, UpdateProductCategoryListener listener) {
         super(parent, modal);
         initComponents();
         txtCategoryCode.setText(productCategory.getCategoryID());
         txtCategoryDescription.setText(productCategory.getCategoryDescription());
         txtCategoryName.setText(productCategory.getCategoryName());
+        txtCategoryCode.setEditable(false);
+        btnUpdate.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(null,
+                    "Bạn có chắc muốn cập nhật?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                listener.onUpdate(
+                        ProductCategory.builder()
+                        .categoryID(txtCategoryCode.getText().trim())
+                        .categoryDescription(txtCategoryDescription.getText().trim())
+                        .categoryName(txtCategoryName.getText().trim())
+                        .build()
+                );
+            }
+        });
     }
 
     /**
@@ -202,7 +222,12 @@ public class UpdateProductCategoryJDialog extends javax.swing.JDialog {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 ProductCategory pc = new ProductCategory();
-                UpdateProductCategoryJDialog dialog = new UpdateProductCategoryJDialog(new javax.swing.JFrame(), true, pc);
+                UpdateProductCategoryJDialog dialog = new UpdateProductCategoryJDialog(new javax.swing.JFrame(), true, pc, new UpdateProductCategoryListener() {
+                    @Override
+                    public void onUpdate(ProductCategory category) {
+                    }
+
+                });
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {

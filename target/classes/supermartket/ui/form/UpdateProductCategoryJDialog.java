@@ -10,6 +10,7 @@ import supermartket.dao.ProductCategoryListener;
 import supermartket.dao.UpdateProductCategoryListener;
 import supermartket.entity.ProductCategory;
 import supermartket.ui.comp.ProductCategoryItem;
+import supermartket.util.XDialog;
 
 /**
  *
@@ -24,7 +25,7 @@ public class UpdateProductCategoryJDialog extends javax.swing.JDialog {
      * @param modal
      * @param productCategory
      */
-    public UpdateProductCategoryJDialog(java.awt.Frame parent, boolean modal,  ProductCategory productCategory, UpdateProductCategoryListener listener) {
+    public UpdateProductCategoryJDialog(java.awt.Frame parent, boolean modal, ProductCategory productCategory, UpdateProductCategoryListener listener) {
         super(parent, modal);
         initComponents();
         txtCategoryCode.setText(productCategory.getCategoryID());
@@ -32,18 +33,36 @@ public class UpdateProductCategoryJDialog extends javax.swing.JDialog {
         txtCategoryName.setText(productCategory.getCategoryName());
         txtCategoryCode.setEditable(false);
         btnUpdate.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(null,
-                    "Bạn có chắc muốn cập nhật?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                listener.onUpdate(
-                        ProductCategory.builder()
-                        .categoryID(txtCategoryCode.getText().trim())
-                        .categoryDescription(txtCategoryDescription.getText().trim())
-                        .categoryName(txtCategoryName.getText().trim())
-                        .build()
-                );
+            if (XDialog.confirm("Bạn có chắc muốn cập nhật?")) {
+                ProductCategory cate = getFormData();
+                if (cate != null) {
+                    listener.onUpdate(cate);
+                    this.dispose();
+                }
             }
         });
+    }
+
+    public ProductCategory getFormData() {
+        String categoryID = txtCategoryCode.getText().trim();
+        String categoryName = txtCategoryName.getText().trim();
+        String categoryDescription = txtCategoryDescription.getText().trim();
+
+        if (categoryID.isEmpty()) {
+            XDialog.alert("Mã loại sản phẩm không được để trống");
+            return null;
+        }
+
+        if (categoryName.isEmpty()) {
+            XDialog.alert("Tên loại sản phẩm không được để trống");
+            return null;
+        }
+
+        return ProductCategory.builder()
+                .categoryID(categoryID)
+                .categoryDescription(categoryDescription)
+                .categoryName(categoryName)
+                .build();
     }
 
     /**
@@ -182,7 +201,6 @@ public class UpdateProductCategoryJDialog extends javax.swing.JDialog {
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         // TODO add your handling code here:
-        this.dispose();
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed

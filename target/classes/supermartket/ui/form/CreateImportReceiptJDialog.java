@@ -49,7 +49,7 @@ public class CreateImportReceiptJDialog extends javax.swing.JDialog implements J
 
     public ImportReceipt getFormData() {
         String status = cboStatus.getSelectedItem().toString();
-        String receiptID = UUID.randomUUID().toString().substring(0, 4).toUpperCase();
+        String receiptID = "REC" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         LocalDate currentDate = LocalDate.now();
         String supplierID = listSupplier.get(cboSupplier.getSelectedIndex()).getSupplierID();
         return ImportReceipt.builder()
@@ -77,14 +77,17 @@ public class CreateImportReceiptJDialog extends javax.swing.JDialog implements J
         }
         btnCreate.addActionListener(e -> {
             if (XDialog.confirm("Bạn có xác nhận muốn thêm nhân viên mới.")) {
-                ImportReceipt imp = dao.create(getFormData());
-                System.out.println(imp);
-                if (imp != null) {
-                    for (ProductImportReceipt productImportReceipt : listProduct) {
-                        detailDao.create(new ImportReceiptDetail(imp.getReceiptID(), productImportReceipt.getProductId(), productImportReceipt.getQuantity(), productImportReceipt.getPrice()));
+                if (listProduct.isEmpty()) {
+                    XDialog.alert("Bạn chưa thêm sản phẩm nào.");
+                } else {
+                    ImportReceipt imp = dao.create(getFormData());
+                    if (imp != null) {
+                        for (ProductImportReceipt productImportReceipt : listProduct) {
+                            detailDao.create(new ImportReceiptDetail(imp.getReceiptID(), productImportReceipt.getProductId(), productImportReceipt.getQuantity(), productImportReceipt.getPrice()));
+                        }
+                        listener.onCreate();
+                        this.dispose();
                     }
-                    listener.onCreate();
-                    this.dispose();
                 }
             }
         });

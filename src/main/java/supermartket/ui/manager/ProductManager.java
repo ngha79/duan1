@@ -18,7 +18,6 @@ import supermartket.dao.ProductCategoryDAO;
 import supermartket.dao.ProductDAO;
 import supermartket.dao.SupplierDAO;
 import supermartket.dao.dto.SearchProductManagerDTO;
-import supermartket.dao.impl.ExcelExporter;
 import supermartket.dao.impl.ProductCategoryDAOImpl;
 import supermartket.dao.impl.ProductDAOImpl;
 import supermartket.dao.impl.SupplierDAOImpl;
@@ -87,7 +86,7 @@ public class ProductManager extends javax.swing.JPanel implements JPanelManager<
         List<Product> list = prodDao.findBySearchStatus(dto);
         int count = prodDao.getTotalItemStatus(dto).getCount();
         int limit = 10;
-        int totalPage = (int) Math.ceil(count / limit);
+        int totalPage = (int) Math.ceil((double)count / limit);
         pagination1.setPagegination(page, totalPage);
         filltoTable(list);
     }

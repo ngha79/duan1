@@ -18,6 +18,7 @@ public class SearchProductDTO {
     private String search;
     private String CategoryID;
     private String SupplierID;
+    private String Status;
     private List<String> productIds;
     private Integer page;
 }

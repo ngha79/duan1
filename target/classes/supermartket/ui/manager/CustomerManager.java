@@ -14,10 +14,10 @@ import supermartket.dao.CustomerDAO;
 import supermartket.dao.JPanelManager;
 import supermartket.dao.dto.CustomerDTO;
 import supermartket.dao.dto.CustomerInfoDTO;
+import supermartket.dao.dto.CustomerTable;
 import supermartket.dao.impl.CustomerDAOImpl;
 import supermartket.entity.Customer;
 import supermartket.excel.ExcelExporterCustomer;
-import supermartket.excel.ExcelExporterInvoice;
 import supermartket.pagination.EventPagination;
 import supermartket.ui.comp.ActionCellEditor;
 import supermartket.ui.comp.ActionCellRenderer;
@@ -377,17 +377,19 @@ public final class CustomerManager extends javax.swing.JPanel implements JPanelM
         List<Customer> list = dao.findByName(dto);
         table.setNumRows(0);
         for (Customer customer : list) {
+            System.out.println(customer);
             Object[] values = {
                 customer.getCustomerID(),
                 customer.getFullName(),
                 customer.getPhone(),
                 customer.getEmail(),
-                customer.getTotalPayment(),};
+                customer.getTotalAmount()
+            };
             table.addRow(values);
         }
         int count = dao.getTotalItem(dto).getCount();
         int limit = 10;
-        int totalPage = (int) Math.ceil(count / limit);
+        int totalPage = (int) Math.ceil((double)count / limit);
         pagination1.setPagegination(page, totalPage);
     }
 

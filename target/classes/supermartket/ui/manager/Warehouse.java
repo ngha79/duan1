@@ -66,7 +66,7 @@ public class Warehouse extends javax.swing.JPanel implements JPanelManager<Wareh
         fillToTable(listIR);
         int count = dao.getTotalItem(dto).getCount();
         int limit = 10;
-        int totalPage = (int) Math.ceil(count / limit);
+        int totalPage = (int) Math.ceil((double) count / limit);
         pagination1.setPagegination(page, totalPage);
     }
 
@@ -79,12 +79,12 @@ public class Warehouse extends javax.swing.JPanel implements JPanelManager<Wareh
         }
 
         for (ImportReceiptDTO importReceiptDTO : list) {
-            Supplier sup = listSup.stream().filter(s -> s.getSupplierID().equalsIgnoreCase(importReceiptDTO.getSupplierID())).findFirst().orElse(null);
+            String sup = listSup.stream().filter(s -> s.getSupplierID().equalsIgnoreCase(importReceiptDTO.getSupplierID())).findFirst().map(s->s.getSupplierName()).orElse(null);
 
             Object[] values = {
                 importReceiptDTO.getReceiptID(),
                 importReceiptDTO.getImportDate(),
-                sup.getSupplierName(),
+                sup,
                 importReceiptDTO.getQuantity(),
                 importReceiptDTO.getTotalPrice(),
                 importReceiptDTO.getStatus(),};
@@ -505,7 +505,10 @@ public class Warehouse extends javax.swing.JPanel implements JPanelManager<Wareh
 
     @Override
     public void update(String id) {
+        System.out.println(id);
         ImportReceiptDTO ip = dao.findById(id);
+        System.out.println(ip);
+
         UpdateImportReceiptJDialog dialog = new UpdateImportReceiptJDialog(null, true, ip, new CreateListener() {
             @Override
             public void onCreate() {

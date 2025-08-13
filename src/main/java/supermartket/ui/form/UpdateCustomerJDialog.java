@@ -14,6 +14,7 @@ import supermartket.util.XDialog;
  * @author hanguyen
  */
 public class UpdateCustomerJDialog extends javax.swing.JDialog {
+
     CustomerDAO dao = new CustomerDAOImpl();
 
     /**
@@ -28,15 +29,40 @@ public class UpdateCustomerJDialog extends javax.swing.JDialog {
         txtPhone.setText(cus.getPhone());
         txtCustomerID.setEditable(false);
     }
-    
+
     public Customer getFormData() {
         String id = txtCustomerID.getText().trim();
         String name = txtName.getText().trim();
         String email = txtEmail.getText().trim();
         String phone = txtPhone.getText().trim();
 
+        // Kiểm tra không được để trống các trường bắt buộc
         if (id.isEmpty() || name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
             XDialog.alert("Không được để trống dữ liệu");
+            return null;
+        }
+
+        // Validate id: chỉ cho phép chữ và số (bạn có thể thay đổi theo yêu cầu)
+        if (!id.matches("^[a-zA-Z0-9]+$")) {
+            XDialog.alert("Mã khách hàng chỉ được chứa chữ cái và số, không có ký tự đặc biệt");
+            return null;
+        }
+
+        // Validate tên: chỉ cho phép chữ cái và khoảng trắng
+        if (!name.matches("^[\\p{L} ]+$")) {
+            XDialog.alert("Tên chỉ được chứa chữ cái và khoảng trắng");
+            return null;
+        }
+
+        // Validate email
+        if (!email.matches("^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
+            XDialog.alert("Email không hợp lệ");
+            return null;
+        }
+
+        // Validate số điện thoại: đúng 10 số
+        if (!phone.matches("^\\d{10}$")) {
+            XDialog.alert("Số điện thoại phải gồm đúng 10 chữ số");
             return null;
         }
 
@@ -82,6 +108,8 @@ public class UpdateCustomerJDialog extends javax.swing.JDialog {
         jLabel3.setText("Tên khách hàng");
 
         jLabel4.setText("Mã khách hàng");
+
+        txtCustomerID.setEditable(false);
 
         jLabel6.setText("Điện thoại");
 

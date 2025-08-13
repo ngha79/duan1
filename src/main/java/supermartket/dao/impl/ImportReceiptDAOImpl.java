@@ -34,7 +34,7 @@ public class ImportReceiptDAOImpl implements ImportReceiptDAO {
                                            SUM(ird.Quantity * ird.UnitPrice) AS totalPrice
                                        FROM 
                                            ImportReceipt ir
-                                       JOIN 
+                                       LEFT JOIN 
                                            ImportReceiptDetail ird ON ir.ReceiptID = ird.ReceiptID
                                        WHERE ir.ReceiptID = ?
                                        GROUP BY 

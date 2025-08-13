@@ -148,7 +148,7 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
             }
         });
 
-        cboStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Trạng thái" }));
+        cboStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Trạng thái", "Đang hợp tác", "Ngừng hợp tác" }));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -259,7 +259,7 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
         }
         int count = dao.getTotalItem(dto).getCount();
         int limit = 10;
-        int totalPage = (int) Math.ceil(count / limit);
+        int totalPage = (int) Math.ceil((double)count / limit);
         pagination1.setPagegination(page, totalPage);
     }
 

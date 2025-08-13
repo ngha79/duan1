@@ -9,7 +9,7 @@ import supermartket.entity.Product;
 
 public interface ProductDAO extends CrudDAO<Product, String>{
     List<Product> findByName(String nameKeyword);
-    PageDTO getTotalItem(SearchProductManagerDTO dto);
+    PageDTO getTotalItem(SearchProductDTO dto);
     PageDTO getTotalItemStatus(SearchProductManagerDTO dto);
     List<Product> findBySearchStatus(SearchProductManagerDTO dto);
     List<Product> findBySearch(SearchProductDTO dto);

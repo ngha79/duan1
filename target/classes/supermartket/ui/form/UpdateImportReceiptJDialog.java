@@ -63,37 +63,71 @@ public class UpdateImportReceiptJDialog extends javax.swing.JDialog implements J
     public UpdateImportReceiptJDialog(java.awt.Frame parent, boolean modal, ImportReceiptDTO importReceipt, CreateListener listener) {
         super(parent, modal);
         initComponents();
-        int index = -1;
+        // Cấu hình bảng
         DefaultTableModel tbl = (DefaultTableModel) tblProduct.getModel();
         tbl.setRowCount(0);
-        ActionCellEditor editor = new ActionCellEditor(tblProduct, this);
         tblProduct.setRowHeight(40);
+        ActionCellEditor editor = new ActionCellEditor(tblProduct, this);
         tblProduct.getColumnModel().getColumn(5).setCellRenderer(new ActionCellRenderer());
         tblProduct.getColumnModel().getColumn(5).setCellEditor(editor);
+        System.out.println(importReceipt);
+        // Đổ dữ liệu Supplier vào combobox
+        String supplierNameToSelect = null;
         for (Supplier supplier : listSupplier) {
             cboSupplier.addItem(supplier.getSupplierName());
-            if (importReceipt.getSupplierID().equalsIgnoreCase(supplier.getSupplierID())) {
-                index = listSupplier.indexOf(supplier);
+            if (supplier.getSupplierID().equalsIgnoreCase(importReceipt.getSupplierID())) {
+                supplierNameToSelect = supplier.getSupplierName();
             }
         }
+        
+        
+
+        // Lấy danh sách chi tiết phiếu nhập
         List<ImportReceiptDetail> irds = detailDao.findAll(importReceipt.getReceiptID());
         for (ImportReceiptDetail ird : irds) {
-            listProduct.add(new ProductImportReceipt(ird.getProductID(), null, null, ird.getQuantity(), ird.getUnitPrice()));
+            listProduct.add(new ProductImportReceipt(
+                    ird.getProductID(),
+                    null,
+                    null,
+                    ird.getQuantity(),
+                    ird.getUnitPrice()
+            ));
         }
         fillToTable(listProduct);
+
+        // Sự kiện nút Cập nhật
         btnUpdate.addActionListener(e -> {
-            if (XDialog.confirm("Bạn có xác nhận muốn cập nhật dữ liệu.")) {
+            if (XDialog.confirm("Bạn có xác nhận muốn cập nhật dữ liệu?")) {
                 ImportReceipt ir = getFormData();
-                dao.update(new ImportReceipt(importReceipt.getReceiptID(), importReceipt.getImportDate(), ir.getSupplierID(), ir.getStatus()));
+
+                // Cập nhật phiếu nhập
+                dao.update(new ImportReceipt(
+                        importReceipt.getReceiptID(),
+                        importReceipt.getImportDate(),
+                        ir.getSupplierID(),
+                        ir.getStatus()
+                ));
+
+                // Xóa chi tiết cũ và thêm chi tiết mới
                 detailDao.deleteByIRId(importReceipt.getReceiptID());
-                for (ProductImportReceipt productImportReceipt : listProduct) {
-                    detailDao.create(new ImportReceiptDetail(importReceipt.getReceiptID(), productImportReceipt.getProductId(), productImportReceipt.getQuantity(), productImportReceipt.getPrice()));
+                for (ProductImportReceipt pir : listProduct) {
+                    detailDao.create(new ImportReceiptDetail(
+                            importReceipt.getReceiptID(),
+                            pir.getProductId(),
+                            pir.getQuantity(),
+                            pir.getPrice()
+                    ));
                 }
+
                 listener.onCreate();
                 this.dispose();
             }
         });
-        cboSupplier.setSelectedItem(listSupplier.get(index));
+
+        // Chọn supplier mặc định
+        if (supplierNameToSelect != null) {
+            cboSupplier.setSelectedItem(supplierNameToSelect);
+        }
     }
 
     public void fillToTable(ArrayList<ProductImportReceipt> products) {
@@ -387,7 +421,6 @@ public class UpdateImportReceiptJDialog extends javax.swing.JDialog implements J
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tblProduct;
     // End of variables declaration//GEN-END:variables
-
 
     @Override
     public void delete(String id) {

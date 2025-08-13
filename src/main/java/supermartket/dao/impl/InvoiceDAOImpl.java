@@ -20,17 +20,24 @@ import supermartket.util.XQuery;
 
 public class InvoiceDAOImpl {
 
-    private final String insertSql = "INSERT INTO Invoice (InvoiceID, InvoiceDate, InvoiceTime, EmployeeID, CustomerID, TotalAmount, TotalQuantity, PaymentMethod, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private final String insertSql = "INSERT INTO Invoice ( InvoiceDate, InvoiceTime, EmployeeID, CustomerID, TotalAmount, TotalQuantity, PaymentMethod, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private final String updateSql = "UPDATE Invoice SET InvoiceDate = ?, InvoiceTime = ?, EmployeeID = ?, CustomerID = ?, TotalAmount = ?, TotalQuantity = ?, PaymentMethod = ?, Status = ? WHERE InvoiceID = ?";
     private final String deleteSql = "DELETE FROM Invoice WHERE InvoiceID = ?";
     private final String findByIdSql = "SELECT * FROM Invoice WHERE InvoiceID = ?";
+    private final String findByDateSql = """
+                                        SELECT TOP 1 i.* FROM Invoice i
+                                        LEFT JOIN Customer c ON i.CustomerID = c.CustomerID
+                                        LEFT JOIN Employee e ON i.EmployeeID = e.EmployeeID
+                                        ORDER BY 
+                                        CAST(i.InvoiceDate AS DATETIME) + CAST(i.InvoiceTime AS DATETIME) DESC
+                                         """;
     private final String findAllSql = "SELECT * FROM Invoice";
     private final String findInvoiceBySearchSql = """
     SELECT i.* FROM Invoice i
     LEFT JOIN Customer c ON i.CustomerID = c.CustomerID
     LEFT JOIN Employee e ON i.EmployeeID = e.EmployeeID
     WHERE
-        (? IS NULL OR c.FullName LIKE ?) AND
+        (? IS NULL OR (c.FullName LIKE ? OR c.FullName IS NULL)) AND
         (? IS NULL OR i.EmployeeID = ?) AND
         (? IS NULL OR i.InvoiceDate >= ?) AND
         (? IS NULL OR i.InvoiceDate <= ?)
@@ -43,31 +50,31 @@ public class InvoiceDAOImpl {
     LEFT JOIN Customer c ON i.CustomerID = c.CustomerID
     LEFT JOIN Employee e ON i.EmployeeID = e.EmployeeID
     WHERE
-        (? IS NULL OR c.FullName LIKE ?) AND
+        (? IS NULL OR (c.FullName LIKE ? OR c.FullName IS NULL)) AND
         (? IS NULL OR i.EmployeeID = ?) AND
         (? IS NULL OR i.InvoiceDate >= ?) AND
         (? IS NULL OR i.InvoiceDate <= ?)
 """;
 
     public Invoice create(Invoice invoice, Connection conn) throws SQLException {
-        String sql = "INSERT INTO Invoice (InvoiceID, InvoiceDate, InvoiceTime, EmployeeID, CustomerID, TotalAmount, TotalQuantity, PaymentMethod, Status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Invoice (InvoiceDate, InvoiceTime, EmployeeID, CustomerID, TotalAmount, TotalQuantity, PaymentMethod, Status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, invoice.getInvoiceID());
-            ps.setDate(2, new java.sql.Date(invoice.getInvoiceDate().getTime()));
-            ps.setTime(3, invoice.getInvoiceTime());
-            ps.setString(4, invoice.getEmployeeID());
+            ps.setDate(1, new java.sql.Date(invoice.getInvoiceDate().getTime()));
+            ps.setDate(1, new java.sql.Date(invoice.getInvoiceDate().getTime()));
+            ps.setTime(2, invoice.getInvoiceTime());
+            ps.setString(3, invoice.getEmployeeID());
 
             if (invoice.getCustomerID() == null) {
-                ps.setNull(5, Types.VARCHAR);
+                ps.setNull(4, Types.VARCHAR);
             } else {
-                ps.setString(5, invoice.getCustomerID());
+                ps.setString(4, invoice.getCustomerID());
             }
 
-            ps.setBigDecimal(6, invoice.getTotalAmount());
-            ps.setInt(7, invoice.getTotalQuantity());
-            ps.setString(8, invoice.getPaymentMethod());
-            ps.setString(9, invoice.getStatus());
+            ps.setBigDecimal(5, invoice.getTotalAmount());
+            ps.setInt(6, invoice.getTotalQuantity());
+            ps.setString(7, invoice.getPaymentMethod());
+            ps.setString(8, invoice.getStatus());
             ps.executeUpdate();
         }
         return invoice;
@@ -94,6 +101,10 @@ public class InvoiceDAOImpl {
 
     public List<Invoice> findAll() {
         return XQuery.getBeanList(Invoice.class, findAllSql);
+    }
+    
+    public Invoice findByDate() {
+        return XQuery.getSingleBean(Invoice.class, findByDateSql);
     }
 
     public Invoice findById(String id) {

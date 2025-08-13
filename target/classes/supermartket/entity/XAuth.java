@@ -6,9 +6,10 @@ package supermartket.entity;
 
 
 public class XAuth {
-    public static User user = User.builder()
-            .employeeCode("EMP001")
-            .username("user1")
-            .password("123213")
+    public static Employee user = Employee.builder()
+            .employeeID("EMP0003")
+            .fullName("Phạm Văn C")
+            .password("123456")
+            .role("Admin")
             .build(); // biến user này sẽ được thay thế sau khi đăng nhập
 }

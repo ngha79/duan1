@@ -38,8 +38,21 @@ public class UpdateSupplierJDialog extends javax.swing.JDialog {
         String address = txtAddress.getText().trim();
         Boolean status = cboStatus.getSelectedItem().toString().equalsIgnoreCase("Đang hợp tác");
 
-        if (id.isEmpty() || name.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
+        // Kiểm tra không được để trống các trường bắt buộc
+        if (id.isEmpty() || name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
             XDialog.alert("Không được để trống dữ liệu");
+            return null;
+        }
+
+        // Validate email
+        if (!email.matches("^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
+            XDialog.alert("Email không hợp lệ");
+            return null;
+        }
+
+        // Validate số điện thoại: đúng 10 số (có thể thay đổi theo yêu cầu)
+        if (!phone.matches("^\\d{10}$")) {
+            XDialog.alert("Số điện thoại phải gồm đúng 10 chữ số");
             return null;
         }
 

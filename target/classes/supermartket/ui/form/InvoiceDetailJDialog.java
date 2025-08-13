@@ -41,9 +41,9 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
         DefaultTableModel tbl = (DefaultTableModel) tblProduct.getModel();
         tbl.setRowCount(0);
 
+        txtInvoiceId.setText(invoice.getInvoiceID());
         txtCustomer.setText(invoice.getCustomerID());
         txtEmployee.setText(invoice.getEmployeeID());
-        txtInvoiceId.setText(invoice.getInvoiceID());
         txtPaymentMethod.setText(invoice.getPaymentMethod());
         txtQuantity.setText(String.valueOf(invoice.getTotalQuantity()));
         txtStatus.setText(invoice.getStatus());

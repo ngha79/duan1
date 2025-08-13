@@ -4,6 +4,7 @@
  */
 package supermartket.dao.dto;
 
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class DashBoardInfoDTO {
-    private Integer todayRevenue;
+    private BigDecimal todayRevenue;
     private Integer todayInvoices;
     private Integer totalProducts;
     private Integer lowStockProducts;

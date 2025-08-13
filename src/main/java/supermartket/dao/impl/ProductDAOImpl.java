@@ -12,7 +12,7 @@ import supermartket.util.XQuery;
 
 public class ProductDAOImpl implements ProductDAO {
 
-    private final String insertSql = "INSERT INTO Product (ProductID, ProductName, ProductImage, CategoryID, SupplierID, Quantity, Price, Status, Unit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private final String insertSql = "INSERT INTO Product (ProductName, ProductImage, CategoryID, SupplierID, Quantity, Price, Status, Unit) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private final String updateSql = "UPDATE Product SET ProductName = ?, ProductImage = ?, CategoryID = ?, SupplierID = ?, Quantity = ?, Price = ?, Status = ?, Unit = ? WHERE ProductID = ?";
     private final String deleteSql = "DELETE FROM Product WHERE ProductID = ?";
     private final String findByIdSql = "SELECT * FROM Product WHERE ProductID = ?";
@@ -22,6 +22,7 @@ public class ProductDAOImpl implements ProductDAO {
                                                SELECT * FROM Product
                                                WHERE 
                                                    (? IS NULL OR ProductName LIKE ?) AND
+                                                   (? IS NULL OR Status = ?) AND
                                                    (? IS NULL OR CategoryID = ?) AND
                                                    (? IS NULL OR SupplierID = ?)
                                                    """;
@@ -45,6 +46,7 @@ public class ProductDAOImpl implements ProductDAO {
                                                SELECT count(*) as count FROM Product
                                                WHERE 
                                                    (? IS NULL OR ProductName LIKE ?) AND
+                                                   (? IS NULL OR Status LIKE ?) AND
                                                    (? IS NULL OR CategoryID = ?) AND
                                                    (? IS NULL OR SupplierID = ?)
                                                    """;
@@ -56,7 +58,6 @@ public class ProductDAOImpl implements ProductDAO {
     @Override
     public Product create(Product entity) {
         Object[] values = {
-            entity.getProductID(),
             entity.getProductName(),
             entity.getProductImage(),
             entity.getCategoryID(),
@@ -120,6 +121,9 @@ public class ProductDAOImpl implements ProductDAO {
         params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%"); // param 1
         params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%"); // param 2
 
+        params.add(dto.getStatus());
+        params.add(dto.getStatus());
+        
         params.add(dto.getCategoryID());
         params.add(dto.getCategoryID());
 
@@ -157,7 +161,7 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public PageDTO getTotalItem(SearchProductManagerDTO dto) {
+    public PageDTO getTotalItem(SearchProductDTO dto) {
         StringBuilder sql = new StringBuilder(getTotalItemSql);
 
         List<Object> params = new ArrayList<>();
@@ -195,4 +199,5 @@ public class ProductDAOImpl implements ProductDAO {
 
         return XQuery.getSingleBean(PageDTO.class, sql.toString(), params.toArray());
     }
+
 }

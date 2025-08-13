@@ -247,8 +247,10 @@
         <Component class="javax.swing.JComboBox" name="cboStatus">
           <Properties>
             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="1">
+              <StringArray count="3">
                 <StringItem index="0" value="Tr&#x1ea1;ng th&#xe1;i"/>
+                <StringItem index="1" value="&#x110;ang h&#x1ee3;p t&#xe1;c"/>
+                <StringItem index="2" value="Ng&#x1eeb;ng h&#x1ee3;p t&#xe1;c"/>
               </StringArray>
             </Property>
           </Properties>

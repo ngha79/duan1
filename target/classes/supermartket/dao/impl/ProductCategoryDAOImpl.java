@@ -8,7 +8,7 @@ import supermartket.util.XQuery;
 
 public class ProductCategoryDAOImpl implements ProductCategoryDAO {
 
-    private String insertSql = "INSERT INTO ProductCategory VALUES(?,?,?)";
+    private String insertSql = "INSERT INTO ProductCategory(CategoryName, CategoryDescription) VALUES(?,?)";
     private String updateSql = "UPDATE ProductCategory SET CategoryName = ?, CategoryDescription = ? WHERE CategoryID = ?";
     private String deleteSql = "DELETE FROM ProductCategory WHERE CategoryID = ?";
     private String findByNameSql = "SELECT * FROM ProductCategory WHERE CategoryName LIKE ? OR CategoryDescription LIKE ?";
@@ -18,7 +18,6 @@ public class ProductCategoryDAOImpl implements ProductCategoryDAO {
     @Override
     public ProductCategory create(ProductCategory entity) {
         Object[] values = {
-            entity.getCategoryID(),
             entity.getCategoryName(),
             entity.getCategoryDescription(),};
         XJdbc.executeUpdate(insertSql, values);

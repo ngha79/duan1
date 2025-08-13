@@ -1,5 +1,6 @@
 package supermartket.entity;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import lombok.*;
 
@@ -12,7 +13,7 @@ public class Customer {
     private String fullName;
     private String phone;
     private String email;
-    private Double totalPayment;  
+    private BigDecimal totalAmount;  
     private Date createdAt;
     private Date updatedAt;
 }

@@ -11,7 +11,7 @@ import supermartket.util.XQuery;
 
 public class SupplierDAOImpl implements SupplierDAO {
 
-    private final String insertSql = "INSERT INTO Supplier (SupplierID, SupplierName, Address, Phone, Email, Status) VALUES (?, ?, ?, ?, ?, ?)";
+    private final String insertSql = "INSERT INTO Supplier (SupplierName, Address, Phone, Email, Status) VALUES ( ?, ?, ?, ?, ?)";
     private final String updateSql = "UPDATE Supplier SET SupplierName = ?, Address = ?, Phone = ?, Email = ?, Status = ? WHERE SupplierID = ?";
     private final String deleteSql = "DELETE FROM Supplier WHERE SupplierID = ?";
     private final String findByIdSql = "SELECT * FROM Supplier WHERE SupplierID = ?";
@@ -35,7 +35,6 @@ public class SupplierDAOImpl implements SupplierDAO {
     @Override
     public Supplier create(Supplier entity) {
         Object[] values = {
-            entity.getSupplierID(),
             entity.getSupplierName(),
             entity.getAddress(),
             entity.getPhone(),

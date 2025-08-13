@@ -12,7 +12,6 @@ import javax.swing.table.DefaultTableModel;
 import supermartket.dao.CustomerDAO;
 import supermartket.dao.EmployeeDAO;
 import supermartket.dao.JPanelManager;
-import supermartket.dao.dto.InvoiceDTO;
 import supermartket.dao.dto.SearchInvoiceDTO;
 import supermartket.dao.impl.CustomerDAOImpl;
 import supermartket.dao.impl.EmployeeDAOImpl;
@@ -22,7 +21,6 @@ import supermartket.entity.Employee;
 import supermartket.entity.Invoice;
 import supermartket.excel.ExcelExporterInvoice;
 import supermartket.pagination.EventPagination;
-import supermartket.pagination.style.PaginationItemRenderStyle1;
 import supermartket.ui.comp.ActionCellImportReceiptEditor;
 import supermartket.ui.comp.ActionCellImportReceiptRenderer;
 import supermartket.ui.form.InvoiceDetailJDialog;
@@ -55,7 +53,7 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
             }
 
         });
-        
+
         fill(1);
     }
 
@@ -84,11 +82,10 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
         List<Invoice> listInvoice = dao.findBySearchEmployeeAndDate(dto);
         int count = dao.getTotalItem(dto).getCount();
         int limit = 10;
-        int totalPage = (int) Math.ceil(count / limit);
+        int totalPage = (int) Math.ceil((double) count / limit);
         pagination1.setPagegination(page, totalPage);
         fillToTable(listInvoice);
     }
-
 
     public void fillToTable(List<Invoice> listInvoice) {
         DefaultTableModel tbl = (DefaultTableModel) tblInvoice.getModel();

@@ -117,45 +117,76 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
     public Product getFormData() {
         String id = txtProductID.getText().trim();
         String name = txtName.getText().trim();
-        Integer quantity = Integer.valueOf(txtQuantity.getText().trim());
-        BigDecimal price = BigDecimal.valueOf(Double.parseDouble(txtProductPrice.getText().trim()));
         String unit = txtUnit.getText().trim();
         String status = cboStatus.getSelectedItem().toString();
-        String supplierID = suppliers.get(0).getSupplierID();
-        String categoryID = categories.get(0).getCategoryID();
         String hinh = img_Upload.getToolTipText();
+
+        // Validate ảnh
+        if (hinh == null || hinh.isEmpty()) {
+            XDialog.alert("Bạn chưa thêm ảnh của sản phẩm");
+            return null;
+        }
+
+        // Validate tên và đơn vị
+        if (name.isEmpty() || unit.isEmpty()) {
+            XDialog.alert("Không được để trống tên sản phẩm và đơn vị tính");
+            return null;
+        }
+
+        // Validate quantity và price có đúng định dạng số không
+        int quantity;
+        try {
+            quantity = Integer.parseInt(txtQuantity.getText().trim());
+            if (quantity <= 0) {
+                XDialog.alert("Số lượng phải là số nguyên dương lớn hơn 0.");
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            XDialog.alert("Số lượng phải là số nguyên hợp lệ.");
+            return null;
+        }
+
+        BigDecimal price;
+        try {
+            price = new BigDecimal(txtProductPrice.getText().trim());
+            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                XDialog.alert("Giá sản phẩm phải lớn hơn 0.");
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            XDialog.alert("Giá sản phẩm phải là số hợp lệ.");
+            return null;
+        }
+
+        // Lấy supplierID và categoryID theo lựa chọn combo box
+        String supplierID = null;
         for (Supplier sup : suppliers) {
             if (sup.getSupplierName().equalsIgnoreCase(cboNCC.getSelectedItem().toString())) {
                 supplierID = sup.getSupplierID();
                 break;
             }
         }
+        if (supplierID == null) {
+            XDialog.alert("Nhà cung cấp không hợp lệ.");
+            return null;
+        }
 
+        String categoryID = null;
         for (ProductCategory category : categories) {
             if (category.getCategoryName().equalsIgnoreCase(cboCategory.getSelectedItem().toString())) {
                 categoryID = category.getCategoryID();
                 break;
             }
         }
-
-        if (hinh.isEmpty()) {
-            XDialog.alert("Bạn chưa thêm ảnh của sản phẩm");
+        if (categoryID == null) {
+            XDialog.alert("Loại sản phẩm không hợp lệ.");
             return null;
         }
 
-        if (id.isEmpty() || name.isEmpty() || unit.isEmpty()) {
-            XDialog.alert("Không được để trống dữ liệu");
-            return null;
-        }
-
-        if (quantity <= 0) {
-            XDialog.alert("Giá trị số phải lớn hơn 0.");
-            return null;
-        }
-
+        // Tạo đối tượng Product
         return Product.builder()
-                .supplierID(supplierID)
                 .productID(id)
+                .supplierID(supplierID)
                 .productName(name)
                 .productImage(hinh)
                 .categoryID(categoryID)

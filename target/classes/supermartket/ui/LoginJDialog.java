@@ -6,8 +6,11 @@ package supermartket.ui;
 
 //import com.formdev.flatlaf.FlatClientProperties;
 
+import supermartket.dao.EmployeeDAO;
 import supermartket.dao.UserDAO;
+import supermartket.dao.impl.EmployeeDAOImpl;
 import supermartket.dao.impl.UserDAOImpl;
+import supermartket.entity.Employee;
 import supermartket.entity.User;
 import supermartket.entity.XAuth;
 import supermartket.util.XDialog;
@@ -177,14 +180,13 @@ public class LoginJDialog extends javax.swing.JDialog {
             return;
         } 
 
-        UserDAO dao = new UserDAOImpl();
-        User user = dao.findById(username);
+        EmployeeDAO dao = new EmployeeDAOImpl();
+        Employee user = dao.findByUserName(username);
         if (user == null) {
             XDialog.alert("Sai tên đăng nhập!");
         } else if (!password.equals(user.getPassword())) {
             XDialog.alert("Sai mật khẩu đăng nhập!");
         } else {
-            System.out.println(user);
             XAuth.user = user; 
             this.dispose();
         }

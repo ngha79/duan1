@@ -31,27 +31,22 @@ import supermartket.util.XDialog;
 public class MainJFrame extends javax.swing.JFrame {
 
     private Dashboard dashboard;
-    private ProductManager product = new ProductManager();
-    private Category category = new Category();
-    private CustomerManager customer = new CustomerManager();
-    private Sell sell = new Sell();
-    private EmployeeManager staff = new EmployeeManager();
-    private SupplierManager supplier = new SupplierManager();
-    private Warehouse warehouse = new Warehouse();
 
     public MainJFrame() {
         initComponents();
         this.init();
         dashboard = new Dashboard(mainPanel);
         this.setPanel(dashboard);
+        txtUserName.setText(XAuth.user.getFullName());
+        txtRole.setText(XAuth.user.getRole());
     }
 
     private void init() {
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
-//        this.showWelcomeJDialog(this);
-//        this.showLoginJDialog(this);
+        this.showWelcomeJDialog(this);
+        this.showLoginJDialog(this);
 //        this.setIconImage(XIcon.getIcon("/icons/trump-small.png").getImage());
     }
 
@@ -92,11 +87,9 @@ public class MainJFrame extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         btnExit = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
+        txtImage = new javax.swing.JLabel();
+        txtUserName = new javax.swing.JLabel();
+        txtRole = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         btnDashboard = new javax.swing.JButton();
         btnProduct = new javax.swing.JButton();
@@ -108,7 +101,6 @@ public class MainJFrame extends javax.swing.JFrame {
         btnStaff = new javax.swing.JButton();
         btnWarehouse = new javax.swing.JButton();
         btnReporting = new javax.swing.JButton();
-        btnReporting1 = new javax.swing.JButton();
         btnSetting = new javax.swing.JButton();
         mainPanel = new javax.swing.JPanel();
 
@@ -126,7 +118,7 @@ public class MainJFrame extends javax.swing.JFrame {
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel3.setText("Hệ thống quản lý bán hàng siêu thị");
+        jLabel3.setText("Hệ thống quản lý bán hàng siêu thị mini");
 
         btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-logout-24.png"))); // NOI18N
         btnExit.setToolTipText("");
@@ -137,25 +129,25 @@ public class MainJFrame extends javax.swing.JFrame {
             }
         });
 
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("A");
-        jLabel4.setPreferredSize(new java.awt.Dimension(40, 40));
+        txtImage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtImage.setText("A");
+        txtImage.setPreferredSize(new java.awt.Dimension(40, 40));
 
-        jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel5.setText("Nguyễn Văn A");
+        txtUserName.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        txtUserName.setText("Nguyễn Văn A");
 
-        jLabel6.setText("Admin");
+        txtRole.setText("Admin");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtImage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtRole, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
@@ -164,19 +156,12 @@ public class MainJFrame extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel6))
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtRole))
+                    .addComponent(txtImage, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(1, 1, 1))
         );
-
-        jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel7.setForeground(new java.awt.Color(51, 51, 51));
-        jLabel7.setText("Ca làm việc: 08:00 - 17:00");
-
-        jLabel8.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel8.setText("Ngày: 21/7/2025");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -189,11 +174,7 @@ public class MainJFrame extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addGap(26, 26, 26)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1725, Short.MAX_VALUE)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnExit, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -205,18 +186,13 @@ public class MainJFrame extends javax.swing.JFrame {
                 .addGap(20, 20, 20)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(btnExit, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(jPanel2Layout.createSequentialGroup()
-                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(0, 0, Short.MAX_VALUE)
-                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING)))))
+                        .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING)))
                 .addGap(0, 13, Short.MAX_VALUE))
         );
 
@@ -333,17 +309,6 @@ public class MainJFrame extends javax.swing.JFrame {
         });
         jPanel4.add(btnReporting);
 
-        btnReporting1.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
-        btnReporting1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-supplier-24.png"))); // NOI18N
-        btnReporting1.setText("Tài khoản");
-        btnReporting1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnReporting1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnReporting1ActionPerformed(evt);
-            }
-        });
-        jPanel4.add(btnReporting1);
-
         btnSetting.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnSetting.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-settings-24.png"))); // NOI18N
         btnSetting.setText("Cài đặt");
@@ -406,26 +371,35 @@ public class MainJFrame extends javax.swing.JFrame {
 
     private void btnProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProductActionPerformed
         // TODO add your handling code here:
+        ProductManager product = new ProductManager();
         setPanel(product);
     }//GEN-LAST:event_btnProductActionPerformed
 
     private void btnCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCategoryActionPerformed
         // TODO add your handling code here:
+        Category category = new Category();
+
         setPanel(category);
     }//GEN-LAST:event_btnCategoryActionPerformed
 
     private void btnSupplierActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSupplierActionPerformed
         // TODO add your handling code here:
+        SupplierManager supplier = new SupplierManager();
+
         setPanel(supplier);
     }//GEN-LAST:event_btnSupplierActionPerformed
 
     private void btnCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCustomerActionPerformed
         // TODO add your handling code here:
+        CustomerManager customer = new CustomerManager();
+
         setPanel(customer);
     }//GEN-LAST:event_btnCustomerActionPerformed
 
     private void btnSellActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSellActionPerformed
         // TODO add your handling code here:
+        Sell sell = new Sell();
+
         setPanel(sell);
     }//GEN-LAST:event_btnSellActionPerformed
 
@@ -437,11 +411,14 @@ public class MainJFrame extends javax.swing.JFrame {
 
     private void btnStaffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStaffActionPerformed
         // TODO add your handling code here:
+        EmployeeManager staff = new EmployeeManager();
         setPanel(staff);
     }//GEN-LAST:event_btnStaffActionPerformed
 
     private void btnWarehouseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnWarehouseActionPerformed
         // TODO add your handling code here:
+        Warehouse warehouse = new Warehouse();
+
         setPanel(warehouse);
     }//GEN-LAST:event_btnWarehouseActionPerformed
 
@@ -463,12 +440,6 @@ public class MainJFrame extends javax.swing.JFrame {
             System.exit(0);
         }
     }//GEN-LAST:event_btnExitActionPerformed
-
-    private void btnReporting1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReporting1ActionPerformed
-        // TODO add your handling code here:
-        UserManager users = new UserManager();
-        setPanel(users);
-    }//GEN-LAST:event_btnReporting1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -513,7 +484,6 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnProduct;
     private javax.swing.JButton btnReporting;
-    private javax.swing.JButton btnReporting1;
     private javax.swing.JButton btnSell;
     private javax.swing.JButton btnSetting;
     private javax.swing.JButton btnStaff;
@@ -522,15 +492,13 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel mainPanel;
+    private javax.swing.JLabel txtImage;
+    private javax.swing.JLabel txtRole;
+    private javax.swing.JLabel txtUserName;
     // End of variables declaration//GEN-END:variables
 }

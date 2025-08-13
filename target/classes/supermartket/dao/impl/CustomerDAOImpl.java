@@ -5,6 +5,7 @@ import java.util.List;
 import supermartket.dao.CustomerDAO;
 import supermartket.dao.dto.CustomerDTO;
 import supermartket.dao.dto.CustomerInfoDTO;
+import supermartket.dao.dto.CustomerTable;
 import supermartket.dao.dto.PageDTO;
 import supermartket.entity.Customer;
 import supermartket.util.XJdbc;
@@ -12,15 +13,21 @@ import supermartket.util.XQuery;
 
 public class CustomerDAOImpl implements CustomerDAO {
 
-    private final String insertSql = "INSERT INTO Customer (CustomerID, FullName, Phone, Email) VALUES (?, ?, ?, ?)";
+    private final String insertSql = "INSERT INTO Customer (FullName, Phone, Email) VALUES ( ?, ?, ?)";
     private final String updateSql = "UPDATE Customer SET FullName = ?, Phone = ?, Email = ? WHERE CustomerID = ?";
     private final String deleteSql = "DELETE FROM Customer WHERE CustomerID = ?";
     private final String findByIdSql = "SELECT * FROM Customer WHERE CustomerID = ?";
+    private final String findByDateSql = "SELECT * FROM Customer ORDER BY CreatedAt DESC";
     private final String findAllSql = "SELECT * FROM Customer";
     private final String findByNameSql = """
-                                        SELECT * FROM Customer WHERE
-                                            (? IS NULL OR FullName LIKE ?)
-                                        ORDER BY CustomerID
+                                        SELECT c.CustomerID, c.FullName, c.Phone, c.Email, SUM(i.TotalAmount) as TotalAmount
+                                        FROM Customer c 
+                                        LEFT JOIN Invoice i
+                                        ON c.CustomerID = i.CustomerID
+                                        WHERE                             
+                                            (? IS NULL OR c.FullName LIKE ?)
+                                        GROUP BY c.CustomerID, c.FullName, c.Phone, c.Email
+                                        ORDER BY c.CustomerID
                                         OFFSET (? - 1) * 10 ROWS
                                         FETCH NEXT 10 ROWS ONLY""";
      private final String getTotalItemSql = """
@@ -46,7 +53,6 @@ public class CustomerDAOImpl implements CustomerDAO {
     @Override
     public Customer create(Customer entity) {
         Object[] values = {
-            entity.getCustomerID(),
             entity.getFullName(),
             entity.getPhone(),
             entity.getEmail(),};
@@ -75,6 +81,11 @@ public class CustomerDAOImpl implements CustomerDAO {
         return XQuery.getSingleBean(Customer.class, findByIdSql, id);
     }
 
+    @Override
+    public Customer findByDate() {
+        return XQuery.getSingleBean(Customer.class, findByDateSql);
+    }
+    
     @Override
     public List<Customer> findAll() {
         return XQuery.getBeanList(Customer.class, findAllSql);

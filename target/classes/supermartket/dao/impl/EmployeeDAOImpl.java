@@ -3,6 +3,7 @@ package supermartket.dao.impl;
 import java.util.ArrayList;
 import java.util.List;
 import supermartket.dao.EmployeeDAO;
+import supermartket.dao.dto.ChangePassworDTO;
 import supermartket.dao.dto.PageDTO;
 import supermartket.dao.dto.SearchEmployeeDTO;
 import supermartket.entity.Employee;
@@ -11,11 +12,13 @@ import supermartket.util.XQuery;
 
 public class EmployeeDAOImpl implements EmployeeDAO {
 
-    private final String insertSql = "INSERT INTO Employee VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+    private final String insertSql = "INSERT INTO Employee(FullName, Username, Password, Phone, Email,Gender,StartDate,Role,Status) VALUES( ?,?,?, ?, ?, ?, ?, ?, ?)";
     private final String updateSql = "UPDATE Employee SET FullName = ?, Phone = ?, Email = ?, Gender = ?, StartDate = ?, Role = ?, Status = ? WHERE EmployeeID = ?";
     private final String deleteSql = "DELETE FROM Employee WHERE EmployeeID = ?";
+    private final String changePasswordSql = "UPDATE Employee SET Password = ? WHERE EmployeeID = ?";
     private final String findByNameSql = "SELECT * FROM Employee WHERE FullName LIKE ?";
     private final String findByIdSql = "SELECT * FROM Employee WHERE EmployeeID = ?";
+    private final String findByUsernameSql = "SELECT * FROM Employee WHERE UserName = ?";
     private final String findAllSql = "SELECT * FROM Employee;";
     private final String findSearchSql = """
                                     SELECT * FROM Employee
@@ -37,14 +40,16 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     @Override
     public Employee create(Employee entity) {
         Object[] values = {
-            entity.getEmployeeID(),
             entity.getFullName(),
-            entity.getRole(),
+            entity.getUsername(),
+            entity.getPassword(),
             entity.getPhone(),
             entity.getEmail(),
+            entity.getGender(),
             entity.getStartDate(),
-            entity.getStatus(),
-            entity.getGender(),};
+            entity.getRole(),
+            entity.getStatus()
+        };
         XJdbc.executeUpdate(insertSql, values);
         return entity;
     }
@@ -103,5 +108,19 @@ public class EmployeeDAOImpl implements EmployeeDAO {
         params.add(dto.getStatus());
         params.add(dto.getStatus());
         return XQuery.getSingleBean(PageDTO.class, sql.toString(), params.toArray());
+    }
+
+    @Override
+    public Employee findByUserName(String username) {
+        return XQuery.getSingleBean(Employee.class, findByUsernameSql, username);
+    }
+
+    @Override
+    public void changePassword(ChangePassworDTO dto) {
+        Object[] values = {
+          dto.getNewPass(),
+          dto.getEmployeeID(),
+        };
+        XJdbc.executeUpdate(changePasswordSql, values);
     }
 }

@@ -4,50 +4,102 @@
  */
 package supermartket.ui.form;
 
+import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.components.DatePickerSettings;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.sql.Date;
-import javax.swing.JOptionPane;
+import java.text.Normalizer;
+import java.time.LocalDate;
+import java.util.Locale;
+import java.util.regex.Pattern;
 import supermartket.dao.CreateEmployeeListener;
 import supermartket.dao.EmployeeDAO;
 import supermartket.dao.impl.EmployeeDAOImpl;
 import supermartket.entity.Employee;
-import supermartket.entity.Product;
 import supermartket.util.XDialog;
 
 public class CreateEmployeeJDialog extends javax.swing.JDialog {
 
+    DatePickerSettings dateSettings = new DatePickerSettings();
+    private DatePicker datePicker;
+
     EmployeeDAO dao = new EmployeeDAOImpl();
 
+    public static String toUsername(String input) {
+        // Bước 1: chuyển về chuẩn Unicode NFD để tách dấu
+        String temp = Normalizer.normalize(input, Normalizer.Form.NFD);
+        // Bước 2: loại bỏ các ký tự dấu
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        temp = pattern.matcher(temp).replaceAll("");
+        // Bước 3: chuyển thành chữ thường
+        temp = temp.toLowerCase();
+        // Bước 4: xóa khoảng trắng 
+        temp = temp.replaceAll("\\s+", "");
+        // Bước 5: loại bỏ ký tự không phải chữ, số hoặc dấu gạch dưới
+        temp = temp.replaceAll("[^a-z0-9_]", "");
+        // Bước 6: nếu muốn, loại bỏ dấu gạch dưới đầu/cuối (không bắt buộc)
+        temp = temp.replaceAll("^_+|_+$", "");
+        return temp;
+    }
+
     public Employee getFormData() {
-        String id = txtEmployeeID.getText().trim();
         String name = txtFullName.getText().trim();
+        String username = toUsername(name);
         String email = txtEmail.getText().trim();
-        String phone = txtPhoneNumber.getText().trim();
-        String startDateStr = txtStartDate.getText().trim(); // yyyy-MM-dd
+        LocalDate selectDate = datePicker.getDate();
+        String phone = txtPhone.getText().trim();
         String role = cboRole.getSelectedItem().toString();
         String statusStr = cboStatus.getSelectedItem().toString();
         boolean gender = "Nam".equals(cboGender.getSelectedItem().toString());
 
-        if (id.isEmpty() || name.isEmpty() || email.isEmpty() || phone.isEmpty() || role.isEmpty()) {
+        // Kiểm tra trống
+        if (name.isEmpty() || email.isEmpty() || phone.isEmpty() || role.isEmpty()) {
             XDialog.alert("Không được để trống dữ liệu");
+            return null;
+        }
+
+        // Kiểm tra tên: chỉ cho phép chữ và dấu cách (bạn có thể điều chỉnh)
+        if (!name.matches("^[\\p{L} ]+$")) {
+            XDialog.alert("Tên chỉ được chứa chữ cái và khoảng trắng");
+            return null;
+        }
+
+        // Kiểm tra email
+        if (!email.matches("^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
+            XDialog.alert("Email không hợp lệ");
+            return null;
+        }
+
+        // Kiểm tra số điện thoại: đúng 10 số
+        if (!phone.matches("^\\d{10}$")) {
+            XDialog.alert("Số điện thoại phải gồm đúng 10 chữ số");
+            return null;
+        }
+
+        // Kiểm tra ngày chọn không null
+        if (selectDate == null) {
+            XDialog.alert("Bạn chưa chọn ngày bắt đầu");
             return null;
         }
 
         Date startDate = null;
         try {
-            startDate = Date.valueOf(startDateStr);
+            startDate = Date.valueOf(selectDate);
         } catch (Exception e) {
             XDialog.alert("Ngày không đúng định dạng yyyy-MM-dd");
             return null;
         }
 
         return Employee.builder()
-                .employeeID(id)
                 .fullName(name)
+                .username(username)
+                .password("123456")
                 .email(email)
                 .phone(phone)
                 .startDate(startDate)
                 .role(role)
-                .status(statusStr) // true nếu đang làm
+                .status(statusStr)
                 .gender(gender)
                 .build();
     }
@@ -58,10 +110,17 @@ public class CreateEmployeeJDialog extends javax.swing.JDialog {
     public CreateEmployeeJDialog(java.awt.Frame parent, boolean modal, CreateEmployeeListener listener) {
         super(parent, modal);
         initComponents();
+        dateSettings.setLocale(new Locale("vi", "VN"));
+        datePicker = new DatePicker(dateSettings);
+        date.setLayout(new BorderLayout());
+        date.add(datePicker, BorderLayout.CENTER);
+        datePicker.setPreferredSize(new Dimension(255, 34));
+
         btnAdd.addActionListener(e -> {
             if (XDialog.confirm("Bạn có xác nhận muốn thêm nhân viên mới.")) {
-                Employee emp = dao.create(getFormData());
+                Employee emp = getFormData();
                 if (emp != null) {
+                    dao.create(emp);
                     listener.onCreate();
                     this.dispose();
                 }
@@ -83,14 +142,11 @@ public class CreateEmployeeJDialog extends javax.swing.JDialog {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         txtFullName = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        txtEmployeeID = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
-        txtPhoneNumber = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtEmail = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
-        txtStartDate = new javax.swing.JTextField();
+        txtPhone = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         btnAdd = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
@@ -99,6 +155,7 @@ public class CreateEmployeeJDialog extends javax.swing.JDialog {
         jLabel12 = new javax.swing.JLabel();
         cboGender = new javax.swing.JComboBox<>();
         cboRole = new javax.swing.JComboBox<>();
+        date = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -109,8 +166,6 @@ public class CreateEmployeeJDialog extends javax.swing.JDialog {
         jLabel2.setText("Nhập thông tin chi tiết của nhân viên");
 
         jLabel3.setText("Họ tên nhân viên");
-
-        jLabel4.setText("Mã nhân viên");
 
         jLabel7.setText("Điện thoại");
 
@@ -144,6 +199,17 @@ public class CreateEmployeeJDialog extends javax.swing.JDialog {
 
         cboRole.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Admin", "Nhân viên" }));
 
+        javax.swing.GroupLayout dateLayout = new javax.swing.GroupLayout(date);
+        date.setLayout(dateLayout);
+        dateLayout.setHorizontalGroup(
+            dateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 255, Short.MAX_VALUE)
+        );
+        dateLayout.setVerticalGroup(
+            dateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 34, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -152,20 +218,14 @@ public class CreateEmployeeJDialog extends javax.swing.JDialog {
                 .addGap(20, 20, 20)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtFullName, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtEmployeeID, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtPhoneNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(108, 108, 108))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(txtPhone, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)))
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -179,17 +239,24 @@ public class CreateEmployeeJDialog extends javax.swing.JDialog {
                         .addComponent(cboGender, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(108, 108, 108))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(date, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)))
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(cboStatus, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 0, Short.MAX_VALUE)))))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtFullName, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(20, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -200,33 +267,25 @@ public class CreateEmployeeJDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtFullName, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtEmployeeID, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtFullName, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtPhoneNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(txtPhone)
+                    .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
-                    .addComponent(cboStatus))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(cboStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(date, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -320,21 +379,19 @@ public class CreateEmployeeJDialog extends javax.swing.JDialog {
     private javax.swing.JComboBox<String> cboGender;
     private javax.swing.JComboBox<String> cboRole;
     private javax.swing.JComboBox<String> cboStatus;
+    private javax.swing.JPanel date;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtEmail;
-    private javax.swing.JTextField txtEmployeeID;
     private javax.swing.JTextField txtFullName;
-    private javax.swing.JTextField txtPhoneNumber;
-    private javax.swing.JTextField txtStartDate;
+    private javax.swing.JTextField txtPhone;
     // End of variables declaration//GEN-END:variables
 }

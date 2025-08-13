@@ -56,7 +56,7 @@ public final class EmployeeManager extends javax.swing.JPanel implements JPanelM
         List<Employee> list = dao.findAll(dto);
         int count = dao.getTotalItem(dto).getCount();
         int limit = 10;
-        int totalPage = (int) Math.ceil(count / limit);
+        int totalPage = (int) Math.ceil((double)count / limit);
         pagination1.setPagegination(page, totalPage);
         filltoTable(list);
     }

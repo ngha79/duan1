@@ -38,13 +38,44 @@ public class UpdateItemImportReceiptDetailJDialog extends javax.swing.JDialog {
     }
 
     public ProductImportReceipt getFormData() {
-        BigDecimal price = BigDecimal.valueOf(Double.parseDouble(txtPrice.getText()));
-        Integer quantity = Integer.valueOf(txtQuantity.getText());
+        BigDecimal price;
+        Integer quantity;
 
-//        if (price.isEmpty() || quantity.isEmpty()) {
-//            XDialog.alert("Không được để trống dữ liệu");
-//            return null;
-//        }
+        // Validate giá
+        try {
+            String priceText = txtPrice.getText().trim();
+            if (priceText.isEmpty()) {
+                XDialog.alert("Giá không được để trống");
+                return null;
+            }
+            price = new BigDecimal(priceText);
+            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                XDialog.alert("Giá phải lớn hơn 0");
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            XDialog.alert("Giá phải là số hợp lệ");
+            return null;
+        }
+
+        // Validate số lượng
+        try {
+            String quantityText = txtQuantity.getText().trim();
+            if (quantityText.isEmpty()) {
+                XDialog.alert("Số lượng không được để trống");
+                return null;
+            }
+            quantity = Integer.valueOf(quantityText);
+            if (quantity <= 0) {
+                XDialog.alert("Số lượng phải lớn hơn 0");
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            XDialog.alert("Số lượng phải là số nguyên hợp lệ");
+            return null;
+        }
+
+        // Nếu đã valid dữ liệu, tạo đối tượng
         return ProductImportReceipt.builder()
                 .categoryId(product.getCategoryId())
                 .productName(product.getProductName())

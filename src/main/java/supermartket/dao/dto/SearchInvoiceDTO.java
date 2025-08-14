@@ -17,6 +17,8 @@ import lombok.NoArgsConstructor;
 public class SearchInvoiceDTO {
     private String search;
     private String employeeId;
+    private String customerId;
+    private String status;
     private Date fromDate;
     private Date toDate;
     private Integer page;

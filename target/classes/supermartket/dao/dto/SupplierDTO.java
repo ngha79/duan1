@@ -16,6 +16,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SupplierDTO {
     private String search;
-    private String status;
+    private Boolean status;
     private Integer page;
 }

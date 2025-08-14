@@ -17,6 +17,8 @@ public class Invoice {
     private String employeeID;
     private String customerID; // nullable
     private BigDecimal totalAmount;
+    private BigDecimal discountApplied;
+    private BigDecimal finalAmount;
     private Integer totalQuantity;
     private String paymentMethod;
     private String status;

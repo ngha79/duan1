@@ -20,8 +20,8 @@ import supermartket.util.XQuery;
 
 public class InvoiceDAOImpl {
 
-    private final String insertSql = "INSERT INTO Invoice ( InvoiceDate, InvoiceTime, EmployeeID, CustomerID, TotalAmount, TotalQuantity, PaymentMethod, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private final String updateSql = "UPDATE Invoice SET InvoiceDate = ?, InvoiceTime = ?, EmployeeID = ?, CustomerID = ?, TotalAmount = ?, TotalQuantity = ?, PaymentMethod = ?, Status = ? WHERE InvoiceID = ?";
+    private final String insertSql = "INSERT INTO Invoice ( InvoiceDate, InvoiceTime, EmployeeID, CustomerID, TotalAmount,DiscountApplied, TotalQuantity, PaymentMethod, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private final String updateSql = "UPDATE Invoice SET InvoiceDate = ?, InvoiceTime = ?, Status = ? WHERE InvoiceID = ?";
     private final String deleteSql = "DELETE FROM Invoice WHERE InvoiceID = ?";
     private final String findByIdSql = "SELECT * FROM Invoice WHERE InvoiceID = ?";
     private final String findByDateSql = """
@@ -39,6 +39,8 @@ public class InvoiceDAOImpl {
     WHERE
         (? IS NULL OR (c.FullName LIKE ? OR c.FullName IS NULL)) AND
         (? IS NULL OR i.EmployeeID = ?) AND
+        (? IS NULL OR i.CustomerID = ?) AND
+        (? IS NULL OR i.Status = ?) AND
         (? IS NULL OR i.InvoiceDate >= ?) AND
         (? IS NULL OR i.InvoiceDate <= ?)
     ORDER BY i.InvoiceID
@@ -51,30 +53,25 @@ public class InvoiceDAOImpl {
     LEFT JOIN Employee e ON i.EmployeeID = e.EmployeeID
     WHERE
         (? IS NULL OR (c.FullName LIKE ? OR c.FullName IS NULL)) AND
-        (? IS NULL OR i.EmployeeID = ?) AND
+        (? IS NULL OR i.EmployeeID = ?) AND       
+        (? IS NULL OR i.CustomerID = ?) AND
+        (? IS NULL OR i.Status = ?) AND
         (? IS NULL OR i.InvoiceDate >= ?) AND
         (? IS NULL OR i.InvoiceDate <= ?)
 """;
 
     public Invoice create(Invoice invoice, Connection conn) throws SQLException {
-        String sql = "INSERT INTO Invoice (InvoiceDate, InvoiceTime, EmployeeID, CustomerID, TotalAmount, TotalQuantity, PaymentMethod, Status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setDate(1, new java.sql.Date(invoice.getInvoiceDate().getTime()));
+
+        try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
             ps.setDate(1, new java.sql.Date(invoice.getInvoiceDate().getTime()));
             ps.setTime(2, invoice.getInvoiceTime());
             ps.setString(3, invoice.getEmployeeID());
-
-            if (invoice.getCustomerID() == null) {
-                ps.setNull(4, Types.VARCHAR);
-            } else {
-                ps.setString(4, invoice.getCustomerID());
-            }
-
+            ps.setString(4, invoice.getCustomerID());
             ps.setBigDecimal(5, invoice.getTotalAmount());
-            ps.setInt(6, invoice.getTotalQuantity());
-            ps.setString(7, invoice.getPaymentMethod());
-            ps.setString(8, invoice.getStatus());
+            ps.setBigDecimal(6, invoice.getDiscountApplied());
+            ps.setInt(7, invoice.getTotalQuantity());
+            ps.setString(8, invoice.getPaymentMethod());
+            ps.setString(9, invoice.getStatus());
             ps.executeUpdate();
         }
         return invoice;
@@ -84,11 +81,6 @@ public class InvoiceDAOImpl {
         Object[] values = {
             entity.getInvoiceDate(),
             entity.getInvoiceTime(),
-            entity.getEmployeeID(),
-            entity.getCustomerID(),
-            entity.getTotalAmount(),
-            entity.getTotalQuantity(),
-            entity.getPaymentMethod(),
             entity.getStatus(),
             entity.getInvoiceID()
         };
@@ -102,7 +94,7 @@ public class InvoiceDAOImpl {
     public List<Invoice> findAll() {
         return XQuery.getBeanList(Invoice.class, findAllSql);
     }
-    
+
     public Invoice findByDate() {
         return XQuery.getSingleBean(Invoice.class, findByDateSql);
     }
@@ -110,17 +102,23 @@ public class InvoiceDAOImpl {
     public Invoice findById(String id) {
         return XQuery.getSingleBean(Invoice.class, findByIdSql, id);
     }
-    
-     public PageDTO getTotalItem(SearchInvoiceDTO dto) {
+
+    public PageDTO getTotalItem(SearchInvoiceDTO dto) {
         StringBuilder sql = new StringBuilder(getTotalInvoiceBySearchSql);
         List<Object> params = new ArrayList<>();
 
         String likeSearch = dto.getSearch() == null ? null : "%" + dto.getSearch() + "%";
-        params.add(likeSearch);  
-        params.add(likeSearch); 
+        params.add(likeSearch);
+        params.add(likeSearch);
 
         params.add(dto.getEmployeeId());
         params.add(dto.getEmployeeId());
+
+        params.add(dto.getCustomerId());
+        params.add(dto.getCustomerId());
+
+        params.add(dto.getStatus());
+        params.add(dto.getStatus());
 
         params.add(dto.getFromDate());
         params.add(dto.getFromDate());
@@ -141,12 +139,18 @@ public class InvoiceDAOImpl {
         params.add(dto.getEmployeeId());
         params.add(dto.getEmployeeId());
 
+        params.add(dto.getCustomerId());
+        params.add(dto.getCustomerId());
+
+        params.add(dto.getStatus());
+        params.add(dto.getStatus());
+
         params.add(dto.getFromDate());
         params.add(dto.getFromDate());
 
         params.add(dto.getToDate());
         params.add(dto.getToDate());
-        
+
         params.add(dto.getPage());
 
         return XQuery.getBeanList(Invoice.class, sql.toString(), params.toArray());

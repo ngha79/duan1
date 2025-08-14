@@ -243,7 +243,8 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
     // End of variables declaration//GEN-END:variables
 
     public void filltoTable(int page) {
-        SupplierDTO dto = new SupplierDTO(txtSearch.getText().trim(), cboStatus.getSelectedItem().toString().equalsIgnoreCase("Trạng thái") ? null : cboStatus.getSelectedItem().toString(), page);
+        Boolean status = cboStatus.getSelectedItem().toString().equalsIgnoreCase("Trạng thái") ? null : cboStatus.getSelectedItem().toString().equalsIgnoreCase("Đang hợp tác") ? true : false;
+        SupplierDTO dto = new SupplierDTO(txtSearch.getText().trim(), status, page);
         List<Supplier> list = dao.findAllByName(dto);
         DefaultTableModel table = (DefaultTableModel) tblSupplier.getModel();
         table.setNumRows(0);
@@ -259,7 +260,7 @@ public class SupplierManager extends javax.swing.JPanel implements JPanelManager
         }
         int count = dao.getTotalItem(dto).getCount();
         int limit = 10;
-        int totalPage = (int) Math.ceil((double)count / limit);
+        int totalPage = (int) Math.ceil((double) count / limit);
         pagination1.setPagegination(page, totalPage);
     }
 

@@ -8,7 +8,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import supermartket.entity.XAuth;
 import supermartket.ui.manager.AnalysisReporting;
 import supermartket.ui.manager.Bill;
@@ -19,15 +18,12 @@ import supermartket.ui.manager.ProductManager;
 import supermartket.ui.manager.Sell;
 import supermartket.ui.manager.Setting;
 import supermartket.ui.manager.EmployeeManager;
+import supermartket.ui.manager.PromotionManager;
 import supermartket.ui.manager.SupplierManager;
-import supermartket.ui.manager.UserManager;
 import supermartket.ui.manager.Warehouse;
 import supermartket.util.XDialog;
 
-/**
- *
- * @author hanguyen
- */
+
 public class MainJFrame extends javax.swing.JFrame {
 
     private Dashboard dashboard;
@@ -45,8 +41,8 @@ public class MainJFrame extends javax.swing.JFrame {
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
-        this.showWelcomeJDialog(this);
-        this.showLoginJDialog(this);
+//        this.showWelcomeJDialog(this);
+//        this.showLoginJDialog(this);
 //        this.setIconImage(XIcon.getIcon("/icons/trump-small.png").getImage());
     }
 
@@ -101,6 +97,7 @@ public class MainJFrame extends javax.swing.JFrame {
         btnStaff = new javax.swing.JButton();
         btnWarehouse = new javax.swing.JButton();
         btnReporting = new javax.swing.JButton();
+        btnPromotion = new javax.swing.JButton();
         btnSetting = new javax.swing.JButton();
         mainPanel = new javax.swing.JPanel();
 
@@ -309,6 +306,17 @@ public class MainJFrame extends javax.swing.JFrame {
         });
         jPanel4.add(btnReporting);
 
+        btnPromotion.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        btnPromotion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-truck-24.png"))); // NOI18N
+        btnPromotion.setText("Ưu đãi");
+        btnPromotion.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnPromotion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPromotionActionPerformed(evt);
+            }
+        });
+        jPanel4.add(btnPromotion);
+
         btnSetting.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         btnSetting.setIcon(new javax.swing.ImageIcon(getClass().getResource("/supermartket/icons/icons8-settings-24.png"))); // NOI18N
         btnSetting.setText("Cài đặt");
@@ -418,7 +426,6 @@ public class MainJFrame extends javax.swing.JFrame {
     private void btnWarehouseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnWarehouseActionPerformed
         // TODO add your handling code here:
         Warehouse warehouse = new Warehouse();
-
         setPanel(warehouse);
     }//GEN-LAST:event_btnWarehouseActionPerformed
 
@@ -440,6 +447,12 @@ public class MainJFrame extends javax.swing.JFrame {
             System.exit(0);
         }
     }//GEN-LAST:event_btnExitActionPerformed
+
+    private void btnPromotionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPromotionActionPerformed
+        // TODO add your handling code here:
+        PromotionManager pro = new PromotionManager();
+        setPanel(pro);
+    }//GEN-LAST:event_btnPromotionActionPerformed
 
     /**
      * @param args the command line arguments
@@ -483,6 +496,7 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnDashboard;
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnProduct;
+    private javax.swing.JButton btnPromotion;
     private javax.swing.JButton btnReporting;
     private javax.swing.JButton btnSell;
     private javax.swing.JButton btnSetting;

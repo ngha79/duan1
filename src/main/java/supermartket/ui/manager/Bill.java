@@ -4,11 +4,18 @@
  */
 package supermartket.ui.manager;
 
+import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.components.DatePickerSettings;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import javax.swing.JFileChooser;
 import javax.swing.table.DefaultTableModel;
+import supermartket.dao.CreateListener;
 import supermartket.dao.CustomerDAO;
 import supermartket.dao.EmployeeDAO;
 import supermartket.dao.JPanelManager;
@@ -24,15 +31,22 @@ import supermartket.pagination.EventPagination;
 import supermartket.ui.comp.ActionCellImportReceiptEditor;
 import supermartket.ui.comp.ActionCellImportReceiptRenderer;
 import supermartket.ui.form.InvoiceDetailJDialog;
+import supermartket.util.XDialog;
 
 public final class Bill extends javax.swing.JPanel implements JPanelManager<Invoice, String> {
-
+    int currentPage = 1;
     InvoiceDAOImpl dao = new InvoiceDAOImpl();
     EmployeeDAO empDao = new EmployeeDAOImpl();
     CustomerDAO cusDao = new CustomerDAOImpl();
     List<Invoice> list = List.of();
     List<Employee> listEmp = empDao.findAll();
     List<Customer> listCus = cusDao.findAll();
+
+    DatePickerSettings startDateSettings = new DatePickerSettings();
+    DatePickerSettings endDateSettings = new DatePickerSettings();
+
+    private DatePicker startDatePicker;
+    private DatePicker endDatePicker;
 
     /**
      * Creates new form Bill
@@ -41,44 +55,67 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
         initComponents();
         ActionCellImportReceiptEditor editor = new ActionCellImportReceiptEditor(tblInvoice, this, "Chi tiết");
         tblInvoice.setRowHeight(60);
-        tblInvoice.getColumnModel().getColumn(9).setCellRenderer(new ActionCellImportReceiptRenderer("Chi tiết"));
-        tblInvoice.getColumnModel().getColumn(9).setCellEditor(editor);
+        tblInvoice.getColumnModel().getColumn(11).setCellRenderer(new ActionCellImportReceiptRenderer("Chi tiết"));
+        tblInvoice.getColumnModel().getColumn(11).setCellEditor(editor);
+
+        startDateSettings.setLocale(new Locale("vi", "VN"));
+        endDateSettings.setLocale(new Locale("vi", "VN"));
+
+        startDatePicker = new DatePicker(startDateSettings);
+        startDate.setLayout(new BorderLayout());
+        startDate.add(startDatePicker, BorderLayout.CENTER);
+        startDatePicker.setPreferredSize(new Dimension(170, 30));
+
+        endDatePicker = new DatePicker(endDateSettings);
+        endDate.setLayout(new BorderLayout());
+        endDate.add(endDatePicker, BorderLayout.CENTER);
+        endDatePicker.setPreferredSize(new Dimension(170, 30));
+
         for (Employee emp : listEmp) {
             cboEmployee.addItem(emp.getFullName());
+        }
+
+        for (Customer cus : listCus) {
+            cboCustomer.addItem(cus.getFullName());
         }
         pagination1.addEventPagination(new EventPagination() {
             @Override
             public void pageChanged(int page) {
                 fill(page);
+                currentPage = page;
             }
 
         });
 
-        fill(1);
+        fill(currentPage);
     }
 
     private void fill(int page) {
         String search = txtSearch.getText().trim();
-        String employeeId = listEmp.stream().filter(e -> e.getFullName().equalsIgnoreCase(cboEmployee.getSelectedItem().toString())).findFirst().map(e -> e.getEmployeeID()).orElse(null);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        Integer indexEmployee = cboEmployee.getSelectedIndex() == 0 ? null : cboEmployee.getSelectedIndex() - 1;
+        Integer indexCustomer = cboCustomer.getSelectedIndex() == 0 ? null : cboCustomer.getSelectedIndex() - 1;
 
-        LocalDate fromDate = null;
-        LocalDate toDate = null;
+        String employeeId = (indexEmployee != null && indexEmployee >= 0 && indexEmployee < listEmp.size())
+                ? listEmp.get(indexEmployee).getEmployeeID()
+                : null;
 
-        String fromText = txtStartDate.getText().trim();
-        String toText = txtEndDate.getText().trim();
+        String customerId = (indexCustomer != null && indexCustomer >= 0 && indexCustomer < listCus.size())
+                ? listCus.get(indexCustomer).getCustomerID()
+                : null;
+        String status = cboStatus.getSelectedItem().toString();
+        status = status.equalsIgnoreCase("Trạng thái") ? null : status;
 
-        if (!fromText.isEmpty()) {
-            fromDate = LocalDate.parse(fromText, formatter);
+        LocalDate start = startDatePicker.getDate();
+        LocalDate end = endDatePicker.getDate();
+        Date startDate = start == null ? null : Date.valueOf(start);
+        Date endDate = end == null ? null : Date.valueOf(end);
+
+        if (start != null && end != null && start.isAfter(end)) {
+            XDialog.alert("Ngày bắt đầu không được sau ngày kết thúc.");
+            return;
         }
 
-        if (!toText.isEmpty()) {
-            toDate = LocalDate.parse(toText, formatter);
-        }
-
-        java.sql.Date sqlFromDate = (fromDate != null) ? java.sql.Date.valueOf(fromDate) : null;
-        java.sql.Date sqlToDate = (toDate != null) ? java.sql.Date.valueOf(toDate) : null;
-        SearchInvoiceDTO dto = new SearchInvoiceDTO(search, employeeId, sqlFromDate, sqlToDate, page);
+        SearchInvoiceDTO dto = new SearchInvoiceDTO(search, employeeId, customerId, status, startDate, endDate, page);
         List<Invoice> listInvoice = dao.findBySearchEmployeeAndDate(dto);
         int count = dao.getTotalItem(dto).getCount();
         int limit = 10;
@@ -101,6 +138,8 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
                 emplyeeName,
                 invoice.getTotalQuantity(),
                 invoice.getTotalAmount(),
+                invoice.getDiscountApplied(),
+                invoice.getFinalAmount(),
                 invoice.getPaymentMethod(),
                 invoice.getStatus()
             };
@@ -125,10 +164,12 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
         jPanel3 = new javax.swing.JPanel();
         txtSearch = new javax.swing.JTextField();
         cboEmployee = new javax.swing.JComboBox<>();
-        txtStartDate = new javax.swing.JTextField();
         btnSearch = new javax.swing.JButton();
-        txtEndDate = new javax.swing.JTextField();
         pagination1 = new supermartket.pagination.Pagination();
+        startDate = new javax.swing.JPanel();
+        endDate = new javax.swing.JPanel();
+        cboCustomer = new javax.swing.JComboBox<>();
+        cboStatus = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblInvoice = new javax.swing.JTable();
 
@@ -193,6 +234,33 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
             }
         });
 
+        javax.swing.GroupLayout startDateLayout = new javax.swing.GroupLayout(startDate);
+        startDate.setLayout(startDateLayout);
+        startDateLayout.setHorizontalGroup(
+            startDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 167, Short.MAX_VALUE)
+        );
+        startDateLayout.setVerticalGroup(
+            startDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout endDateLayout = new javax.swing.GroupLayout(endDate);
+        endDate.setLayout(endDateLayout);
+        endDateLayout.setHorizontalGroup(
+            endDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 155, Short.MAX_VALUE)
+        );
+        endDateLayout.setVerticalGroup(
+            endDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 31, Short.MAX_VALUE)
+        );
+
+        cboCustomer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tất cả khách hàng" }));
+
+        cboStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Trạng thái", "Đã thanh toán", "Chưa thanh toán" }));
+        cboStatus.setToolTipText("");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -200,14 +268,18 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(startDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(endDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cboEmployee, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cboCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cboStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSearch)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
                 .addComponent(pagination1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -215,26 +287,28 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(18, 18, 18)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(endDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(pagination1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(cboEmployee, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(19, Short.MAX_VALUE))
+                        .addComponent(cboCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cboStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(startDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(10, Short.MAX_VALUE))
         );
 
         tblInvoice.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã HĐ", "Ngày", "Giờ", "Khách hàng", "Nhân viên", "Số lượng", "Tổng tiền", "Thanh toán", "Trạng thái", "Thao tác"
+                "Mã HĐ", "Ngày", "Giờ", "Khách hàng", "Nhân viên", "Số lượng", "Tổng tiền đơn hàng", "Tiền giảm giá", "Tổng tiền thanh toán", "Thanh toán", "Trạng thái", "Thao tác"
             }
         ));
         tblInvoice.setRowHeight(60);
@@ -259,7 +333,7 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 668, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 677, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -267,7 +341,7 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1399, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -300,7 +374,10 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExportExcel;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JComboBox<String> cboCustomer;
     private javax.swing.JComboBox<String> cboEmployee;
+    private javax.swing.JComboBox<String> cboStatus;
+    private javax.swing.JPanel endDate;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
@@ -308,10 +385,9 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private supermartket.pagination.Pagination pagination1;
+    private javax.swing.JPanel startDate;
     private javax.swing.JTable tblInvoice;
-    private javax.swing.JTextField txtEndDate;
     private javax.swing.JTextField txtSearch;
-    private javax.swing.JTextField txtStartDate;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -321,7 +397,12 @@ public final class Bill extends javax.swing.JPanel implements JPanelManager<Invo
     @Override
     public void update(String id) {
         Invoice ip = dao.findById(id);
-        InvoiceDetailJDialog dialog = new InvoiceDetailJDialog(null, true, ip);
+        InvoiceDetailJDialog dialog = new InvoiceDetailJDialog(null, true, ip, new CreateListener() {
+            @Override
+            public void onCreate() {
+                fill(currentPage);
+            }
+        });
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }

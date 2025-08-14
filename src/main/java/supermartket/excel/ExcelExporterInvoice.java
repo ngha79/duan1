@@ -58,8 +58,10 @@ public class ExcelExporterInvoice {
             excelRow.createCell(4).setCellValue(list.get(row).getEmployeeID());
             excelRow.createCell(5).setCellValue(list.get(row).getTotalQuantity());
             excelRow.createCell(6).setCellValue(list.get(row).getTotalAmount().doubleValue());
-            excelRow.createCell(7).setCellValue(list.get(row).getPaymentMethod());
-            excelRow.createCell(8).setCellValue(list.get(row).getStatus());
+            excelRow.createCell(7).setCellValue(list.get(row).getDiscountApplied().doubleValue());
+            excelRow.createCell(8).setCellValue(list.get(row).getFinalAmount().doubleValue());
+            excelRow.createCell(9).setCellValue(list.get(row).getPaymentMethod());
+            excelRow.createCell(10).setCellValue(list.get(row).getStatus());
         }
 
         for (int col = 0; col < table.getColumnCount(); col++) {

@@ -25,8 +25,10 @@ import net.miginfocom.swing.MigLayout;
 import supermartket.dao.ActionCartItem;
 import supermartket.dao.CustomerDAO;
 import supermartket.dao.InvoiceDetailDAO;
+import supermartket.dao.PaymentListener;
 import supermartket.dao.ProductCategoryDAO;
 import supermartket.dao.ProductDAO;
+import supermartket.dao.PromotionDAO;
 import supermartket.dao.SelectCustomerListener;
 import supermartket.dao.SupplierDAO;
 import supermartket.dao.dto.SearchProductDTO;
@@ -36,16 +38,19 @@ import supermartket.dao.impl.InvoiceDAOImpl;
 import supermartket.dao.impl.InvoiceDetailDAOImpl;
 import supermartket.dao.impl.ProductCategoryDAOImpl;
 import supermartket.dao.impl.ProductDAOImpl;
+import supermartket.dao.impl.PromotionDAOImpl;
 import supermartket.dao.impl.SupplierDAOImpl;
 import supermartket.entity.Customer;
 import supermartket.entity.Invoice;
 import supermartket.entity.InvoiceDetail;
 import supermartket.entity.Product;
 import supermartket.entity.ProductCategory;
+import supermartket.entity.Promotion;
 import supermartket.entity.Supplier;
 import supermartket.entity.XAuth;
 import supermartket.pagination.EventPagination;
 import supermartket.ui.comp.CartItemDetail;
+import supermartket.ui.form.ConfirmPaymentJDialog;
 import supermartket.ui.form.SelectCustomer;
 import supermartket.util.XDialog;
 import supermartket.util.XJdbc;
@@ -58,6 +63,7 @@ public final class Sell extends javax.swing.JPanel {
     SupplierDAO supDao = new SupplierDAOImpl();
     InvoiceDAOImpl invoiceDao = new InvoiceDAOImpl();
     InvoiceDetailDAO invoiceDetailDao = new InvoiceDetailDAOImpl();
+    PromotionDAO promotionDAO = new PromotionDAOImpl();
 
     List<Product> list;
     List<CartItemSell> listCartItem = new ArrayList<>();
@@ -133,7 +139,7 @@ public final class Sell extends javax.swing.JPanel {
                 calculateChange();
             }
         });
-        
+
         pagination1.addEventPagination(new EventPagination() {
             @Override
             public void pageChanged(int page) {
@@ -147,21 +153,44 @@ public final class Sell extends javax.swing.JPanel {
         panelItems.removeAll();
         JPanel panelCartItem = new JPanel(new MigLayout("wrap 1", "[grow]", "[]"));
 
-        double totalPrice = 0.0;
         for (CartItemSell prod : listCartItem) {
-            totalPrice += prod.getQuantity() * prod.getPrice().doubleValue();
             panelCartItem.add(createCartItemDetail(prod));
         }
-
-        double totalVat = totalPrice / 10;
-        double totalPayment = totalPrice + totalVat;
-        updateCartTotals(totalPrice, totalVat, totalPayment);
+        updatePrice();
 
         JScrollPane scrollPane = createScrollPane(panelCartItem);
         panelItems.setLayout(new BorderLayout());
         panelItems.add(scrollPane, BorderLayout.CENTER);
         panelItems.revalidate();
         panelItems.repaint();
+    }
+
+    private void updatePrice() {
+        double totalPrice = 0.0;
+        for (CartItemSell prod : listCartItem) {
+            totalPrice += prod.getQuantity() * prod.getPrice().doubleValue();
+        }
+
+        double discountAmount = 0.0;
+
+        String customerId = txtCustomer.getText().trim();
+        if (!customerId.equals("CUST0001")) {
+            Promotion promotion = promotionDAO.getPromotionForCustomer(customerId);
+            if (promotion != null) {
+                double amount = Double.parseDouble(promotion.getDiscountAmount().toString());
+                double maxAmount = Double.parseDouble(promotion.getMaxDiscountAmount().toString());
+                double percentDiscount = Double.parseDouble(promotion.getDiscountPercent().toString());
+                discountAmount = totalPrice * percentDiscount / 100.0;
+                if (maxAmount > 0.0 && discountAmount > maxAmount) {
+                    discountAmount = maxAmount;
+                }
+                if (amount > 0.0) {
+                    discountAmount = Double.parseDouble(promotion.getDiscountAmount().toString());
+                }
+            }
+        }
+        double totalPayment = totalPrice - discountAmount;
+        updateCartTotals(totalPrice, discountAmount, totalPayment);
     }
 
     private CartItemDetail createCartItemDetail(CartItemSell prod) {
@@ -178,10 +207,10 @@ public final class Sell extends javax.swing.JPanel {
         });
     }
 
-    private void updateCartTotals(double totalPrice, double totalVat, double totalPayment) {
+    private void updateCartTotals(double totalPrice, double discountAmount, double totalPayment) {
         DecimalFormat df = new DecimalFormat("#,##0.00");
 
-        txtPriceVat.setText(df.format(totalVat) + "đ");
+        txtDiscount.setText(df.format(discountAmount) + "đ");
         txtTotalPrice.setText(df.format(totalPrice) + "đ");
         txtTotalAmount.setText(df.format(totalPayment) + "đ");
     }
@@ -292,6 +321,91 @@ public final class Sell extends javax.swing.JPanel {
         renderProductPanel();
     }
 
+    public void createInvoice(String status) {
+        Date invoiceDate = new Date(); // Ngày hiện tại
+        LocalTime invoiceTime = LocalTime.now();
+        String employeeID = XAuth.user.getEmployeeID();
+        String customerID = txtCustomer.getText().trim();
+
+        String rawTotal = txtTotalPrice.getText()
+                .replace("đ", "")
+                .replace(",", "")
+                .trim();
+        String rawTotalDiscount = txtDiscount.getText()
+                .replace("đ", "")
+                .replace(",", "")
+                .trim();
+
+        BigDecimal totalAmount;
+        try {
+            totalAmount = new BigDecimal(rawTotal);
+            if (totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                XDialog.alert("Tổng tiền phải lớn hơn 0.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            XDialog.alert("Tổng tiền không hợp lệ.");
+            return;
+        }
+
+        BigDecimal applyDiscount = new BigDecimal(rawTotalDiscount);
+
+        if (listCartItem == null || listCartItem.isEmpty()) {
+            XDialog.alert("Giỏ hàng đang trống, không thể thanh toán.");
+            return;
+        }
+
+        int totalQuantity = 0;
+        for (CartItemSell cartItemSell : listCartItem) {
+            totalQuantity += cartItemSell.getQuantity();
+        }
+
+        String paymentMethod = cboPaymentMethod.getSelectedItem().toString();
+
+        Invoice invoice = Invoice.builder()
+                .invoiceDate(invoiceDate)
+                .invoiceTime(Time.valueOf(invoiceTime))
+                .employeeID(employeeID)
+                .customerID((customerID == null || customerID.isEmpty()) ? "CUST0001" : customerID)
+                .totalAmount(totalAmount)
+                .discountApplied(applyDiscount)
+                .totalQuantity(totalQuantity)
+                .paymentMethod(paymentMethod)
+                .status(status)
+                .build();
+
+        try (Connection conn = XJdbc.openConnection()) {
+            try {
+                conn.setAutoCommit(false);
+                invoiceDao.create(invoice, conn);
+                Invoice inv = invoiceDao.findByDate();
+                for (CartItemSell item : listCartItem) {
+                    InvoiceDetail detail = InvoiceDetail.builder()
+                            .invoiceID(inv.getInvoiceID())
+                            .productID(item.getProductId())
+                            .unitPrice(item.getPrice())
+                            .quantity(item.getQuantity())
+                            .build();
+                    invoiceDetailDao.create(detail, conn);
+                }
+                conn.commit();
+
+                list = dao.findAll();
+                listCartItem = new ArrayList<>();
+                listSearchProduct = new ArrayList<>();
+                renderProductPanel();
+                renderCartPanel();
+            } catch (Exception ex) {
+                conn.rollback();
+                ex.printStackTrace();
+                XDialog.alert("Lỗi khi thanh toán: " + ex.getMessage());
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            XDialog.alert("Không thể kết nối CSDL: " + ex.getMessage());
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -324,11 +438,9 @@ public final class Sell extends javax.swing.JPanel {
         jLabel18 = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
         jLabel20 = new javax.swing.JLabel();
-        jLabel21 = new javax.swing.JLabel();
         jLabel22 = new javax.swing.JLabel();
         txtTotalPrice = new javax.swing.JLabel();
-        jLabel24 = new javax.swing.JLabel();
-        txtPriceVat = new javax.swing.JLabel();
+        txtDiscount = new javax.swing.JLabel();
         txtTotalAmount = new javax.swing.JLabel();
         panelToShow = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
@@ -475,7 +587,7 @@ public final class Sell extends javax.swing.JPanel {
         );
         panelItemsLayout.setVerticalGroup(
             panelItemsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 283, Short.MAX_VALUE)
+            .addGap(0, 315, Short.MAX_VALUE)
         );
 
         a.setBackground(new java.awt.Color(255, 255, 255));
@@ -502,9 +614,6 @@ public final class Sell extends javax.swing.JPanel {
         jLabel20.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel20.setText("Giảm giá:");
 
-        jLabel21.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel21.setText("VAT (10%):");
-
         jLabel22.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel22.setText("Tổng cộng:");
 
@@ -512,13 +621,9 @@ public final class Sell extends javax.swing.JPanel {
         txtTotalPrice.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         txtTotalPrice.setText("0đ");
 
-        jLabel24.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel24.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel24.setText("0đ");
-
-        txtPriceVat.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        txtPriceVat.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        txtPriceVat.setText("0đ");
+        txtDiscount.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtDiscount.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        txtDiscount.setText("0đ");
 
         txtTotalAmount.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         txtTotalAmount.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -573,16 +678,12 @@ public final class Sell extends javax.swing.JPanel {
                 .addGroup(aLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, aLayout.createSequentialGroup()
                         .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 145, Short.MAX_VALUE)
                         .addComponent(txtTotalAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, aLayout.createSequentialGroup()
-                        .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtPriceVat, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, aLayout.createSequentialGroup()
                         .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtDiscount, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, aLayout.createSequentialGroup()
                         .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -592,10 +693,10 @@ public final class Sell extends javax.swing.JPanel {
                         .addComponent(btnPayment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addComponent(btnPrint, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, aLayout.createSequentialGroup()
+                    .addComponent(panelToShow, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(aLayout.createSequentialGroup()
                         .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(panelToShow, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addGap(21, 21, 21))
         );
         aLayout.setVerticalGroup(
@@ -608,11 +709,7 @@ public final class Sell extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(aLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel20)
-                    .addComponent(jLabel24))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(aLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel21)
-                    .addComponent(txtPriceVat))
+                    .addComponent(txtDiscount))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(aLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel22)
@@ -732,85 +829,19 @@ public final class Sell extends javax.swing.JPanel {
 
     private void btnPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPaymentActionPerformed
         // TODO add your handling code here:
-        Date invoiceDate = new Date(); // Ngày hiện tại
-        LocalTime invoiceTime = LocalTime.now();
-        String employeeID = XAuth.user.getEmployeeID();
-        String customerID = txtCustomer.getText().trim();
-
-        String rawTotal = txtTotalAmount.getText()
-                .replace("đ", "")
-                .replace(",", "")
-                .trim();
-
-        BigDecimal totalAmount;
-        try {
-            totalAmount = new BigDecimal(rawTotal);
-            if (totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
-                XDialog.alert("Tổng tiền phải lớn hơn 0.");
-                return;
+        ConfirmPaymentJDialog confirm = new ConfirmPaymentJDialog(null, true, new PaymentListener() {
+            @Override
+            public void onConfirm() {
+                createInvoice("Đã thanh toán");
             }
-        } catch (NumberFormatException e) {
-            XDialog.alert("Tổng tiền không hợp lệ.");
-            return;
-        }
 
-        if (listCartItem == null || listCartItem.isEmpty()) {
-            XDialog.alert("Giỏ hàng đang trống, không thể thanh toán.");
-            return;
-        }
-
-        int totalQuantity = 0;
-        for (CartItemSell cartItemSell : listCartItem) {
-            totalQuantity += cartItemSell.getQuantity();
-        }
-
-        String paymentMethod = cboPaymentMethod.getSelectedItem().toString();
-        String status = "Đã thanh toán";
-
-        Invoice invoice = Invoice.builder()
-                .invoiceDate(invoiceDate)
-                .invoiceTime(Time.valueOf(invoiceTime))
-                .employeeID(employeeID)
-                .customerID((customerID == null || customerID.isEmpty()) ? "CUST0001" : customerID)
-                .totalAmount(totalAmount)
-                .totalQuantity(totalQuantity)
-                .paymentMethod(paymentMethod)
-                .status(status)
-                .build();
-
-        try (Connection conn = XJdbc.openConnection()) {
-            try {
-                conn.setAutoCommit(false);
-                invoiceDao.create(invoice, conn);
-                Invoice inv = invoiceDao.findByDate();
-                for (CartItemSell item : listCartItem) {
-                    InvoiceDetail detail = InvoiceDetail.builder()
-                            .invoiceID(inv.getInvoiceID())
-                            .productID(item.getProductId())
-                            .unitPrice(item.getPrice())
-                            .quantity(item.getQuantity())
-                            .build();
-                    invoiceDetailDao.create(detail, conn);
-                }
-                conn.commit();
-                XDialog.alert("Thanh toán thành công!");
-
-                // Reset dữ liệu và giao diện
-                list = dao.findAll();
-                listCartItem = new ArrayList<>();
-                listSearchProduct = new ArrayList<>();
-                renderProductPanel();
-                renderCartPanel();
-            } catch (Exception ex) {
-                conn.rollback();
-                ex.printStackTrace();
-                XDialog.alert("Lỗi khi thanh toán: " + ex.getMessage());
+            @Override
+            public void onCancel() {
+                createInvoice("Chưa thanh toán");
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            XDialog.alert("Không thể kết nối CSDL: " + ex.getMessage());
-        }
-
+        });
+        confirm.setLocationRelativeTo(null);
+        confirm.setVisible(true);
     }//GEN-LAST:event_btnPaymentActionPerformed
 
     private void btnCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCustomerActionPerformed
@@ -820,12 +851,14 @@ public final class Sell extends javax.swing.JPanel {
             public void onSelected(Customer item) {
                 txtCustomer.setText(item.getCustomerID());
                 txtCustomerName.setText(item.getFullName());
+                updatePrice();
             }
 
             @Override
             public void onCreate(Customer item) {
                 txtCustomer.setText(item.getCustomerID());
                 txtCustomerName.setText(item.getFullName());
+                updatePrice();
             }
 
         });
@@ -849,9 +882,7 @@ public final class Sell extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
-    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
-    private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -868,8 +899,8 @@ public final class Sell extends javax.swing.JPanel {
     private javax.swing.JLabel txtConten;
     private javax.swing.JTextField txtCustomer;
     private javax.swing.JLabel txtCustomerName;
+    private javax.swing.JLabel txtDiscount;
     private javax.swing.JLabel txtPay;
-    private javax.swing.JLabel txtPriceVat;
     private javax.swing.JTextField txtSearch;
     private javax.swing.JLabel txtTotalAmount;
     private javax.swing.JLabel txtTotalPrice;

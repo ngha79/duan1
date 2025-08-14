@@ -4,25 +4,33 @@
  */
 package supermartket.ui.form;
 
+import java.sql.Time;
+import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
+import supermartket.dao.CreateListener;
+import supermartket.dao.InvoiceDAO;
 import supermartket.dao.InvoiceDetailDAO;
 import supermartket.dao.ProductDAO;
+import supermartket.dao.impl.InvoiceDAOImpl;
 import supermartket.dao.impl.InvoiceDetailDAOImpl;
 import supermartket.dao.impl.ProductDAOImpl;
 import supermartket.entity.Invoice;
 import supermartket.entity.InvoiceDetail;
 import supermartket.entity.Product;
+import supermartket.util.XDialog;
 
 public class InvoiceDetailJDialog extends javax.swing.JDialog {
 
     InvoiceDetailDAO dao = new InvoiceDetailDAOImpl();
+    InvoiceDAOImpl invoicedao = new InvoiceDAOImpl();
     ProductDAO prodDao = new ProductDAOImpl();
 
     /**
      * Creates new form CreateProduct
      */
-    public InvoiceDetailJDialog(java.awt.Frame parent, boolean modal, Invoice invoice) {
+    public InvoiceDetailJDialog(java.awt.Frame parent, boolean modal, Invoice invoice, CreateListener listener) {
         super(parent, modal);
         initComponents();
         fillToTable(invoice);
@@ -35,6 +43,28 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
         txtStatus.setEditable(false);
         txtTime.setEditable(false);
         txtTotalAmount.setEditable(false);
+        txtApplyDiscount.setEditable(false);
+        txtFinalAmount.setEditable(false);
+
+        if (invoice.getStatus().equalsIgnoreCase("Chưa thanh toán")) {
+            btnPayment.setVisible(true);
+        } else {
+            btnPayment.setVisible(false);
+        }
+
+        btnPayment.addActionListener(e -> {
+            if (XDialog.confirm("Bạn có xác nhận là đơn hàng này thanh toán.")) {
+                Date invoiceDate = new Date();
+                LocalTime invoiceTime = LocalTime.now();
+                Invoice update = invoice;
+                update.setStatus("Đã thanh toán");
+                update.setInvoiceDate(invoiceDate);
+                update.setInvoiceTime(Time.valueOf(invoiceTime));
+                invoicedao.update(update);
+                listener.onCreate();
+                this.dispose();
+            }
+        });
     }
 
     public void fillToTable(Invoice invoice) {
@@ -49,6 +79,8 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
         txtStatus.setText(invoice.getStatus());
         txtTime.setText(invoice.getInvoiceDate().toString());
         txtTotalAmount.setText(String.valueOf(invoice.getTotalAmount()));
+        txtApplyDiscount.setText(String.valueOf(invoice.getDiscountApplied()));
+        txtFinalAmount.setText(String.valueOf(invoice.getFinalAmount()));
 
         List<InvoiceDetail> list = dao.findByInvoiceID(invoice.getInvoiceID());
 
@@ -96,6 +128,11 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
         txtTime = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
         txtPaymentMethod = new javax.swing.JTextField();
+        txtApplyDiscount = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        txtFinalAmount = new javax.swing.JTextField();
+        btnPayment = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -129,6 +166,7 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
                 "Mã sản phẩm", "Tên sản phẩm", "Số lượng", "Giá"
             }
         ));
+        tblProduct.setRowHeight(40);
         jScrollPane1.setViewportView(tblProduct);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -158,6 +196,17 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
 
         jLabel11.setText("Phương thức thanh toán");
 
+        jLabel12.setText("Tổng tiền giảm giá");
+
+        jLabel13.setText("Tổng thanh toán");
+
+        btnPayment.setText("Thanh toán");
+        btnPayment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPaymentActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -165,7 +214,10 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnCancel)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnPayment)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnCancel))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(398, 398, 398))
@@ -204,7 +256,15 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
                             .addGap(18, 18, 18)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(txtPaymentMethod, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addComponent(txtPaymentMethod, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtApplyDiscount, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGap(18, 18, 18)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtFinalAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addGap(0, 20, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -240,6 +300,14 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
                     .addComponent(txtTotalAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtApplyDiscount, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtFinalAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -251,7 +319,9 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnPayment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCancel, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE))
                 .addContainerGap(20, Short.MAX_VALUE))
         );
 
@@ -275,6 +345,10 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPaymentActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnPaymentActionPerformed
 
     /**
      * @param args the command line arguments
@@ -370,7 +444,11 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 Invoice invoice = new Invoice();
-                InvoiceDetailJDialog dialog = new InvoiceDetailJDialog(new javax.swing.JFrame(), true, invoice);
+                InvoiceDetailJDialog dialog = new InvoiceDetailJDialog(new javax.swing.JFrame(), true, invoice, new CreateListener() {
+                    @Override
+                    public void onCreate() {
+                    }
+                });
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -384,9 +462,12 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnPayment;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -399,8 +480,10 @@ public class InvoiceDetailJDialog extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tblProduct;
+    private javax.swing.JTextField txtApplyDiscount;
     private javax.swing.JTextField txtCustomer;
     private javax.swing.JTextField txtEmployee;
+    private javax.swing.JTextField txtFinalAmount;
     private javax.swing.JTextField txtInvoiceId;
     private javax.swing.JTextField txtPaymentMethod;
     private javax.swing.JTextField txtQuantity;

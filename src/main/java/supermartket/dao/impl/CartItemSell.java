@@ -19,5 +19,6 @@ public class CartItemSell {
     private String productImage;
     private String name;
     private Integer quantity;
+    private Integer maxQuantity;
     private BigDecimal price;
 }

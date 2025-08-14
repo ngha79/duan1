@@ -192,6 +192,7 @@ supermartket\ui\form\CreateProductCategoryJDialog$2.class
 supermartket\ui\manager\Warehouse$4.class
 supermartket\ui\form\UpdateCustomerJDialog.class
 supermartket\ui\manager\Sell$10.class
+supermartket\ui\manager\ProductManager$7.class
 supermartket\entity\Invoice.class
 supermartket\ui\form\UpdateItemImportReceiptDetailJDialog$1.class
 supermartket\ui\form\ListProductJDialog$5.class
@@ -249,6 +250,7 @@ supermartket\ui\MainJFrame$7.class
 supermartket\ui\manager\Setting.class
 supermartket\ui\manager\Bill$3.class
 supermartket\ui\form\UpdateProductJDialog$4.class
+supermartket\dao\dto\SearchProductActiveDTO$SearchProductActiveDTOBuilder.class
 supermartket\ui\form\CreateEmployeeJDialog$3.class
 supermartket\ui\manager\EmployeeManager$2.class
 supermartket\ui\manager\PromotionManager$4.class
@@ -278,6 +280,7 @@ supermartket\ui\manager\Dashboard$2.class
 supermartket\ui\manager\EmployeeManager.class
 supermartket\dao\impl\SupplierDAOImpl.class
 supermartket\ui\manager\PromotionManager$2.class
+supermartket\dao\dto\SearchProductActiveDTO.class
 supermartket\dao\PaymentTypeDAO.class
 supermartket\ui\form\SelectCustomer$1.class
 supermartket\dao\impl\InvoiceDAOImpl.class

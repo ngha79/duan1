@@ -8,14 +8,13 @@ import java.util.List;
 import supermartket.dao.dto.CartProductDTO;
 import supermartket.dao.dto.CartReceiptDTO;
 import supermartket.dao.dto.DashBoardInfoDTO;
-import supermartket.entity.Invoice;
 import supermartket.util.XQuery;
 
 
 public class DashBoardImpl {
     String infoSql = """
                      SELECT 
-                         (SELECT COALESCE(SUM(TotalAmount), 0) AS todayRevenue
+                         (SELECT COALESCE(SUM(FinalAmount), 0) AS todayRevenue
                          FROM Invoice
                          WHERE invoiceDate >= CAST(GETDATE() AS DATE)
                            AND invoiceDate < DATEADD(DAY, 1, CAST(GETDATE() AS DATE))

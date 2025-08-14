@@ -6,11 +6,14 @@ package supermartket.ui.manager;
 
 import java.awt.Frame;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import supermartket.dao.CreateListener;
 import supermartket.dao.JPanelManager;
@@ -61,7 +64,7 @@ public class ProductManager extends javax.swing.JPanel implements JPanelManager<
 
         });
 
-        fill(1);
+        fill(currentPage);
     }
 
     public void fill(int page) {
@@ -86,7 +89,7 @@ public class ProductManager extends javax.swing.JPanel implements JPanelManager<
         List<Product> list = prodDao.findBySearchStatus(dto);
         int count = prodDao.getTotalItemStatus(dto).getCount();
         int limit = 10;
-        int totalPage = (int) Math.ceil((double)count / limit);
+        int totalPage = (int) Math.ceil((double) count / limit);
         pagination1.setPagegination(page, totalPage);
         filltoTable(list);
     }
@@ -298,6 +301,7 @@ public class ProductManager extends javax.swing.JPanel implements JPanelManager<
     // End of variables declaration//GEN-END:variables
 
     public void filltoTable(List<Product> list) {
+
         DefaultTableModel model = new DefaultTableModel(
                 new Object[]{"Mã sản phẩm", "Ảnh", "Tên SP", "Loại", "NCC", "Giá", "Tồn kho", "Đơn vị", "Trạng thái", "Thao tác"}, 0
         ) {
@@ -319,6 +323,10 @@ public class ProductManager extends javax.swing.JPanel implements JPanelManager<
         };
 
         for (Product prod : list) {
+            ImageIcon placeholder = new ImageIcon(
+                    getClass().getResource("/supermartket/icons/logout.png")
+            );
+
             String supplier = suppliers.stream()
                     .filter(s -> s.getSupplierID().equalsIgnoreCase(prod.getSupplierID()))
                     .map(Supplier::getSupplierName)
@@ -331,41 +339,51 @@ public class ProductManager extends javax.swing.JPanel implements JPanelManager<
                     .findFirst()
                     .orElse("");
 
-            ImageIcon icon = null;
-            if (prod.getProductImage() != null && !prod.getProductImage().isEmpty()) {
-                try {
-                    // Nếu URL ảnh là từ internet
-                    if (prod.getProductImage().startsWith("http")) {
-                        icon = new ImageIcon(new URL(prod.getProductImage()));
-                    } // Nếu là đường dẫn file trên máy
-                    else {
-                        icon = new ImageIcon(prod.getProductImage());
-                    }
-
-                    // Scale ảnh
-                    Image img = icon.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
-                    icon = new ImageIcon(img);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
+            // Thêm dòng và lấy vị trí
+            int rowIndex = model.getRowCount();
             model.addRow(new Object[]{
                 prod.getProductID(),
-                icon,
+                placeholder,
                 prod.getProductName(),
                 category,
                 supplier,
                 prod.getPrice(),
                 prod.getQuantity(),
                 prod.getUnit(),
-                prod.getStatus(),});
+                prod.getStatus()
+            });
+
+            // Load ảnh bất đồng bộ
+            new SwingWorker<ImageIcon, Void>() {
+                @Override
+                protected ImageIcon doInBackground() {
+                    try {
+                        URL url = new URL(prod.getProductImage());
+                        BufferedImage img = ImageIO.read(url);
+                        Image image = img.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+                        return new ImageIcon(image);
+                    } catch (Exception e) {
+                        return placeholder;
+                    }
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        ImageIcon icon = get();
+                        model.setValueAt(icon, rowIndex, 1); // ✅ set đúng dòng
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.execute();
         }
         tblProduct.setModel(model);
         ActionCellEditor editor = new ActionCellEditor(tblProduct, this);
         tblProduct.setRowHeight(65);
         tblProduct.getColumnModel().getColumn(9).setCellRenderer(new ActionCellRenderer());
         tblProduct.getColumnModel().getColumn(9).setCellEditor(editor);
+
     }
 
     @Override

@@ -137,8 +137,8 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
         int quantity;
         try {
             quantity = Integer.parseInt(txtQuantity.getText().trim());
-            if (quantity <= 0) {
-                XDialog.alert("Số lượng phải là số nguyên dương lớn hơn 0.");
+            if (quantity < 0) {
+                XDialog.alert("Số lượng phải là số nguyên không âm.");
                 return null;
             }
         } catch (NumberFormatException e) {
@@ -252,6 +252,8 @@ public class UpdateProductJDialog extends javax.swing.JDialog {
         jLabel8.setText("Đơn vị");
 
         jLabel9.setText("Số lượng tồn");
+
+        txtQuantity.setEditable(false);
 
         jLabel10.setText("Trạng thái");
 

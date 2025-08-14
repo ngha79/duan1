@@ -12,10 +12,10 @@ import javax.swing.table.DefaultTableModel;
 import supermartket.dao.CreateEmployeeListener;
 import supermartket.dao.EmployeeDAO;
 import supermartket.dao.JPanelManager;
+import supermartket.dao.dto.PageDTO;
 import supermartket.dao.dto.SearchEmployeeDTO;
 import supermartket.dao.impl.EmployeeDAOImpl;
 import supermartket.entity.Employee;
-import supermartket.excel.ExcelExporterCustomer;
 import supermartket.excel.ExcelExporterEmployee;
 import supermartket.pagination.EventPagination;
 import supermartket.ui.comp.ActionCellEditor;
@@ -45,6 +45,9 @@ public final class EmployeeManager extends javax.swing.JPanel implements JPanelM
             }
 
         });
+        
+        PageDTO total = dao.getTotalItem(new SearchEmployeeDTO("",null,null));
+        txtTotalEmployee.setText(String.valueOf(total.getCount()));
         fillTable(currentPage);
     }
     
@@ -79,7 +82,7 @@ public final class EmployeeManager extends javax.swing.JPanel implements JPanelM
         jPanel7 = new javax.swing.JPanel();
         jPanel8 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
+        txtTotalEmployee = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblEmployee = new javax.swing.JTable();
@@ -157,8 +160,8 @@ public final class EmployeeManager extends javax.swing.JPanel implements JPanelM
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel7.setText("Tổng nhân viên");
 
-        jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel8.setText("24");
+        txtTotalEmployee.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        txtTotalEmployee.setText("24");
 
         jLabel9.setForeground(new java.awt.Color(102, 102, 102));
         jLabel9.setText("Đang hoạt động");
@@ -171,7 +174,7 @@ public final class EmployeeManager extends javax.swing.JPanel implements JPanelM
                 .addGap(14, 14, 14)
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtTotalEmployee, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -181,7 +184,7 @@ public final class EmployeeManager extends javax.swing.JPanel implements JPanelM
                 .addGap(15, 15, 15)
                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtTotalEmployee, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel9)
                 .addContainerGap(15, Short.MAX_VALUE))
@@ -299,7 +302,6 @@ public final class EmployeeManager extends javax.swing.JPanel implements JPanelM
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel6;
@@ -309,6 +311,7 @@ public final class EmployeeManager extends javax.swing.JPanel implements JPanelM
     private supermartket.pagination.Pagination pagination1;
     private javax.swing.JTable tblEmployee;
     private javax.swing.JTextField txtSearch;
+    private javax.swing.JLabel txtTotalEmployee;
     // End of variables declaration//GEN-END:variables
 
     public void filltoTable(List<Employee> list) {

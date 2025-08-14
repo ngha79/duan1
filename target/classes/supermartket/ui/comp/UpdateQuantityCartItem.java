@@ -34,6 +34,9 @@ public class UpdateQuantityCartItem extends javax.swing.JDialog {
                 if (quantity <= 0) {
                     XDialog.alert("Vui lòng nhập số lớn hơn 0.");
                     quantity = -1;
+                } else if (quantity > cartItem.getMaxQuantity()) {
+                    XDialog.alert("Sản phẩm chỉ còn " + cartItem.getMaxQuantity());
+                    quantity = -1;
                 } else {
                     item.setQuantity(quantity);
                     listener.update(item);

@@ -215,6 +215,8 @@ public class UpdatePromotionJDialog extends javax.swing.JDialog {
 
         jLabel3.setText("Mã");
 
+        txtPromotionId.setEditable(false);
+
         jLabel4.setText("Giá tối thiểu áp dụng");
 
         txtMinTotalAmount.addActionListener(new java.awt.event.ActionListener() {
@@ -262,8 +264,6 @@ public class UpdatePromotionJDialog extends javax.swing.JDialog {
         );
 
         jLabel10.setText("Tên ");
-
-        txtPromotionName.setEditable(false);
 
         txtMaxDiscountAmount.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

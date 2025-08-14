@@ -2,9 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package supermartket.dao.impl;
+package supermartket.dao.dto;
 
-import java.math.BigDecimal;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,11 +14,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CartItemSell {
-    private String productId;
-    private String productImage;
-    private String name;
-    private Integer quantity;
-    private Integer maxQuantity;
-    private BigDecimal price;
+public class SearchProductActiveDTO {
+    private String search;
+    private String CategoryID;
+    private String SupplierID;
+    private List<String> productIds;
+    private Integer page;
 }

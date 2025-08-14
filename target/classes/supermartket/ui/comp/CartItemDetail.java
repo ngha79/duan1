@@ -34,7 +34,7 @@ public class CartItemDetail extends javax.swing.JPanel {
             public void mouseClicked(MouseEvent e) {
                 Component source = (Component) e.getSource();
                 Frame frame = (Frame) SwingUtilities.getWindowAncestor(source);
-                CartItemSell cartItem = new CartItemSell(item.getProductId(), item.getProductImage(), item.getName(), item.getQuantity(), item.getPrice());
+                CartItemSell cartItem = new CartItemSell(item.getProductId(), item.getProductImage(), item.getName(), item.getQuantity(), item.getMaxQuantity(), item.getPrice());
                 UpdateQuantityCartItem update = new UpdateQuantityCartItem(frame, true, cartItem, listener);
                 update.setLocationRelativeTo(null);
                 update.setVisible(true);

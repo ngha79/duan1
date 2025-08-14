@@ -205,7 +205,7 @@
                           <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="jLabel7" alignment="0" min="-2" pref="223" max="-2" attributes="0"/>
-                              <Component id="jLabel8" alignment="0" min="-2" pref="107" max="-2" attributes="0"/>
+                              <Component id="txtTotalEmployee" alignment="0" min="-2" pref="107" max="-2" attributes="0"/>
                               <Component id="jLabel9" alignment="0" min="-2" pref="202" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="32767" attributes="0"/>
@@ -218,7 +218,7 @@
                           <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
                           <Component id="jLabel7" min="-2" pref="31" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="jLabel8" min="-2" pref="31" max="-2" attributes="0"/>
+                          <Component id="txtTotalEmployee" min="-2" pref="31" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jLabel9" min="-2" max="-2" attributes="0"/>
                           <EmptySpace pref="15" max="32767" attributes="0"/>
@@ -235,7 +235,7 @@
                     <Property name="text" type="java.lang.String" value="T&#x1ed5;ng nh&#xe2;n vi&#xea;n"/>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JLabel" name="jLabel8">
+                <Component class="javax.swing.JLabel" name="txtTotalEmployee">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Segoe UI" size="18" style="1"/>

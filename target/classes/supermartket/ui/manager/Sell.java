@@ -31,6 +31,7 @@ import supermartket.dao.ProductDAO;
 import supermartket.dao.PromotionDAO;
 import supermartket.dao.SelectCustomerListener;
 import supermartket.dao.SupplierDAO;
+import supermartket.dao.dto.SearchProductActiveDTO;
 import supermartket.dao.dto.SearchProductDTO;
 import supermartket.dao.impl.CartItemSell;
 import supermartket.dao.impl.CustomerDAOImpl;
@@ -56,7 +57,7 @@ import supermartket.util.XDialog;
 import supermartket.util.XJdbc;
 
 public final class Sell extends javax.swing.JPanel {
-
+    int currentPage = 1;
     ProductDAO dao = new ProductDAOImpl();
     ProductCategoryDAO cateDao = new ProductCategoryDAOImpl();
     CustomerDAO cusDao = new CustomerDAOImpl();
@@ -76,11 +77,10 @@ public final class Sell extends javax.swing.JPanel {
      */
     public Sell() {
         initComponents();
-        this.list = dao.findBySearch(new SearchProductDTO(txtSearch.getText().trim(), null, null, "Đang bán", listSearchProduct, 1));
         paymentPanel.setPreferredSize(new Dimension(400, 0));
         listCate.forEach(cate -> cboCategory.addItem(cate.getCategoryName()));
         listSup.forEach(sup -> cboSupplier.addItem(sup.getSupplierName()));
-        renderProductPanel();
+        fillTable(currentPage);
         renderCartPanel();
 
         panelToShow.setVisible(false);
@@ -143,7 +143,8 @@ public final class Sell extends javax.swing.JPanel {
         pagination1.addEventPagination(new EventPagination() {
             @Override
             public void pageChanged(int page) {
-                fillTable(1);
+                fillTable(page);
+                currentPage = page;
             }
 
         });
@@ -248,14 +249,14 @@ public final class Sell extends javax.swing.JPanel {
 
     private CartItem createProductItem(Product prod) {
         return new CartItem(prod, (Product product) -> {
-            int quantity = promptQuantity();
+            int quantity = promptQuantity(prod);
             if (quantity > 0) {
                 addProductToCart(product, quantity);
             }
         });
     }
 
-    private int promptQuantity() {
+    private int promptQuantity(Product prod) {
         int quantity = -1;
         do {
             String input = JOptionPane.showInputDialog(null, "Nhập số lượng:");
@@ -267,6 +268,10 @@ public final class Sell extends javax.swing.JPanel {
                 quantity = Integer.parseInt(input);
                 if (quantity <= 0) {
                     JOptionPane.showMessageDialog(null, "Vui lòng nhập số lớn hơn 0.");
+                    quantity = -1;
+                }
+                if (quantity > prod.getQuantity()) {
+                    JOptionPane.showMessageDialog(null, "Sản phẩm chỉ còn lại " + prod.getQuantity());
                     quantity = -1;
                 }
             } catch (NumberFormatException e) {
@@ -282,6 +287,7 @@ public final class Sell extends javax.swing.JPanel {
                 prod.getProductImage(),
                 prod.getProductName(),
                 quantity,
+                prod.getQuantity(),
                 prod.getPrice()
         ));
         listSearchProduct.add(prod.getProductID());
@@ -312,9 +318,9 @@ public final class Sell extends javax.swing.JPanel {
                 break;
             }
         }
-        SearchProductDTO dto = new SearchProductDTO(txtSearch.getText().trim(), cateId, supId, null, listSearchProduct, page);
-        list = dao.findBySearch(dto);
-        int count = dao.getTotalItem(dto).getCount();
+        SearchProductActiveDTO dto = new SearchProductActiveDTO(txtSearch.getText().trim(), cateId, supId, listSearchProduct, page);
+        list = dao.findBySearchActive(dto);
+        int count = dao.getTotalItemActive(dto).getCount();
         int limit = 10;
         int totalPage = (int) Math.ceil((double) count / limit);
         pagination1.setPagegination(page, totalPage);

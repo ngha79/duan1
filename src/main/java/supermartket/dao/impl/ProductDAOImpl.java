@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import supermartket.dao.ProductDAO;
 import supermartket.dao.dto.PageDTO;
+import supermartket.dao.dto.SearchProductActiveDTO;
 import supermartket.dao.dto.SearchProductDTO;
 import supermartket.dao.dto.SearchProductManagerDTO;
 import supermartket.entity.Product;
@@ -54,6 +55,25 @@ public class ProductDAOImpl implements ProductDAO {
                                          ORDER BY ProductId
                                           OFFSET (? - 1) * 10 ROWS
                                           FETCH NEXT 10 ROWS ONLY;""";
+
+    private final String findBySearchActiveSql = """
+                                               SELECT * FROM Product
+                                               WHERE 
+                                                   (? IS NULL OR ProductName LIKE ?) AND
+                                                   ( Status = N'Đang bán') AND
+                                                   ( Quantity > 0) AND
+                                                   (? IS NULL OR CategoryID = ?) AND
+                                                   (? IS NULL OR SupplierID = ?)
+                                                   """;
+    private final String getTotalItemActiveSql = """
+                                               SELECT count(*) as count FROM Product
+                                                WHERE 
+                                                    (? IS NULL OR ProductName LIKE ?) AND
+                                                    (Status = N'Đang bán') AND
+                                                    (Quantity > 0) AND
+                                                    (? IS NULL OR CategoryID = ?) AND
+                                                    (? IS NULL OR SupplierID = ?)
+                                                   """;
 
     @Override
     public Product create(Product entity) {
@@ -123,7 +143,7 @@ public class ProductDAOImpl implements ProductDAO {
 
         params.add(dto.getStatus());
         params.add(dto.getStatus());
-        
+
         params.add(dto.getCategoryID());
         params.add(dto.getCategoryID());
 
@@ -142,6 +162,7 @@ public class ProductDAOImpl implements ProductDAO {
     public List<Product> findBySearchStatus(SearchProductManagerDTO dto) {
         StringBuilder sql = new StringBuilder(findBySearchStatusSql);
         sql.append(pagination);
+
         List<Object> params = new ArrayList<>();
         params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%");
         params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%");
@@ -154,7 +175,7 @@ public class ProductDAOImpl implements ProductDAO {
 
         params.add(dto.getSupplierID());
         params.add(dto.getSupplierID());
-        
+
         params.add(dto.getPage());
 
         return XQuery.getBeanList(Product.class, sql.toString(), params.toArray());
@@ -179,7 +200,7 @@ public class ProductDAOImpl implements ProductDAO {
 
         return XQuery.getSingleBean(PageDTO.class, sql.toString(), params.toArray());
     }
-    
+
     @Override
     public PageDTO getTotalItemStatus(SearchProductManagerDTO dto) {
         StringBuilder sql = new StringBuilder(getTotalItemStatusSql);
@@ -198,6 +219,63 @@ public class ProductDAOImpl implements ProductDAO {
         params.add(dto.getSupplierID());
 
         return XQuery.getSingleBean(PageDTO.class, sql.toString(), params.toArray());
+    }
+
+    @Override
+    public PageDTO getTotalItemActive(SearchProductActiveDTO dto) {
+        StringBuilder sql = new StringBuilder(getTotalItemActiveSql);
+        if (dto.getProductIds() != null && !dto.getProductIds().isEmpty()) {
+            sql.append(" AND ProductID NOT IN (");
+            sql.append("?,".repeat(dto.getProductIds().size()));
+            sql.setLength(sql.length() - 1); // Xóa dấu "," cuối
+            sql.append(")");
+        }
+
+        List<Object> params = new ArrayList<>();
+        params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%");
+        params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%");
+
+        params.add(dto.getCategoryID());
+        params.add(dto.getCategoryID());
+
+        params.add(dto.getSupplierID());
+        params.add(dto.getSupplierID());
+
+        if (dto.getProductIds() != null) {
+            params.addAll(dto.getProductIds());
+        }
+
+        return XQuery.getSingleBean(PageDTO.class, sql.toString(), params.toArray());
+    }
+
+    @Override
+    public List<Product> findBySearchActive(SearchProductActiveDTO dto) {
+        StringBuilder sql = new StringBuilder(findBySearchActiveSql);
+        if (dto.getProductIds() != null && !dto.getProductIds().isEmpty()) {
+            sql.append(" AND ProductID NOT IN (");
+            sql.append("?,".repeat(dto.getProductIds().size()));
+            sql.setLength(sql.length() - 1); // Xóa dấu "," cuối
+            sql.append(")");
+        }
+        sql.append(pagination);
+
+        List<Object> params = new ArrayList<>();
+        params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%");
+        params.add(dto.getSearch() == null ? null : "%" + dto.getSearch() + "%");
+
+        params.add(dto.getCategoryID());
+        params.add(dto.getCategoryID());
+
+        params.add(dto.getSupplierID());
+        params.add(dto.getSupplierID());
+
+        if (dto.getProductIds() != null) {
+            params.addAll(dto.getProductIds());
+        }
+
+        params.add(dto.getPage());
+
+        return XQuery.getBeanList(Product.class, sql.toString(), params.toArray());
     }
 
 }
